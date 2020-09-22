@@ -117,7 +117,6 @@ CreateShader(const char *vertexShader, const char *fragmentShader)
     return program;
 }
 
-
 void 
 Bind(Shader *s)
 {
@@ -131,9 +130,23 @@ Unbind(Shader *s)
 }
 
 void
+SetUniform1i(Shader *s, const char *name, int v)
+{
+    int uniformLocation = GetUniformLocation(s, name);
+    GLCall(glUniform1i(uniformLocation, v));
+}
+
+void
+SetUniform1f(Shader *s, const char *name, float v)
+{
+    int uniformLocation = GetUniformLocation(s, name);
+    GLCall(glUniform1f(uniformLocation, v));
+}
+
+void
 SetUniform4f(Shader *s, const char *name, float v[4])
 {
-    unsigned int uniformLocation = GetUniformLocation(s, name);
+    int uniformLocation = GetUniformLocation(s, name);
     GLCall(glUniform4f(uniformLocation, v[0], v[1], v[2], v[3]));
 }
 

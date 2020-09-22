@@ -7,11 +7,15 @@
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #include "renderer.cpp"
 #include "vertex_buffer.cpp"
 #include "index_buffer.cpp"
 #include "vertex_array.cpp"
 #include "shader.cpp"
+#include "texture.cpp"
 
 int main()
 {
@@ -41,12 +45,12 @@ int main()
     }
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    float vertexBufferData[8] = 
+    float vertexBufferData[16] = 
     {
-        -0.5f, -0.5f, // 0
-         0.5f, -0.5f, // 1
-         0.5f,  0.5f, // 2
-        -0.5f,  0.5f, // 3
+        -0.5f, -0.5f, 0.0f, 0.0f,  // 0
+         0.5f, -0.5f, 1.0f, 0.0f,  // 1
+         0.5f,  0.5f, 1.0f, 1.0f,  // 2
+        -0.5f,  0.5f, 0.0f, 1.0f,  // 3
     };
 
     unsigned int indexBufferData[6] = 
@@ -55,14 +59,18 @@ int main()
         2, 3, 0, // left upper triangle
     };
 
+    //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC1_ALPHA));
+    //GLCall(glEnable(GL_BLEND));
+
     VertexArray *vertexArray = NewVertexArray();
     ASSERT(vertexArray != NULL);
 
-    VertexBuffer *vertexBuffer = NewVertexBuffer((void *)vertexBufferData, 8 * sizeof(float));
+    VertexBuffer *vertexBuffer = NewVertexBuffer(vertexBufferData, 16 * sizeof(float));
     ASSERT(vertexBuffer != NULL);
 
     VertexBufferLayout *vertexBufferLayout = NewVertexBufferLayout(2);
     ASSERT(vertexBufferLayout != NULL);
+    Push(vertexBufferLayout, GL_FLOAT, 2);
     Push(vertexBufferLayout, GL_FLOAT, 2);
     AddBuffer(vertexArray, vertexBuffer, vertexBufferLayout);
 
@@ -76,15 +84,10 @@ int main()
     ASSERT(shader != NULL);
     Bind(shader);
 
-    float colors[4] = 
-    {
-        0.0f, // red
-        0.3f, // green
-        0.8f, // blue
-        1.0f, // alpha
-    };
-
-    SetUniform4f(shader, "u_color", colors);
+    Texture *texture = NewTexture("..\\assets\\image.png");
+    ASSERT(texture != NULL);
+    Bind(texture, 0);
+    SetUniform1i(shader, "u_texture", 0);
 
     Unbind(vertexArray);
     Unbind(vertexBuffer);
@@ -97,22 +100,8 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         Clear(&renderer);
-
         Bind(shader);
-        SetUniform4f(shader, "u_color", colors);
-
         Draw(&renderer, vertexArray, indexBuffer, shader);
-
-        if (colors[0] > 1.0f)
-        {
-            increment = -0.05f;
-        }
-        else if (colors[0] < 0.0f)
-        {
-            increment = 0.05f;
-        }
-
-        colors[0] += increment;
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -122,6 +111,7 @@ int main()
         DeleteVertexBuffer(vertexBuffer);
         DeleteIndexBuffer(indexBuffer);
         DeleteVertexArray(vertexArray);
+        DeleteTexture(texture);
         glfwTerminate();
         free(vertexBuffer);
         free(indexBuffer);

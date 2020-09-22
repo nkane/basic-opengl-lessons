@@ -29,6 +29,7 @@ struct VertexBufferElement
     unsigned int Count;
     unsigned char Normalized;
     unsigned int TypeSize;
+    unsigned int Offset;
 };
 
 struct VertexBufferLayout

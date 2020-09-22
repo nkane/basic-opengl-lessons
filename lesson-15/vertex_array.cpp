@@ -39,15 +39,14 @@ AddBuffer(VertexArray *vertexArray, VertexBuffer *vertexBuffer, VertexBufferLayo
 {
     Bind(vertexArray);
     Bind(vertexBuffer);
-    unsigned int i = 0;
     unsigned int offset = 0;
-    while (i < vertexBufferLayout->Length)
+    for (int i = 0; i < vertexBufferLayout->Length; i++)
     {
         VertexBufferElement *element = &vertexBufferLayout->Elements[i];
         GLCall(glEnableVertexAttribArray(i));
         GLCall(glVertexAttribPointer(i, element->Count, element->Type, 
                                      element->Normalized, vertexBufferLayout->Stride, (const void *)offset));
         offset += element->Count * element->TypeSize;
-        i++;
+        element->Offset = offset;
     }
 }

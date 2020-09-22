@@ -52,6 +52,12 @@ void
 Unbind(Shader *s);
 
 void
+SetUniform1i(Shader *s, const char *name, int v);
+
+void
+SetUniform1f(Shader *s, const char *name, float v);
+
+void
 SetUniform4f(Shader *s, const char *name, float v[4]);
 
 int
