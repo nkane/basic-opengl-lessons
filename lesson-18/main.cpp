@@ -79,17 +79,22 @@ int main()
     IndexBuffer *indexBuffer = NewIndexBuffer(indexBufferData, 6);
     ASSERT(indexBuffer != NULL);
 
+    // projection matrix orthogonal
     glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    glm::vec4 vertexPosition(100.0f, 100.0f, 0.0f, 1.0f);
+    // view matrix (identity matrix) with translation
+    glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
+    // model matrix
+    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(200.0f, 200.0f, 0.0f));
 
-    glm::vec4 result = projectionMatrix * vertexPosition;
+    // model view projection matrix
+    glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 
     const char *vertexShaderPath = "shaders/vertex.glsl";
     const char *fragmentShaderPath = "shaders/fragment.glsl";
     Shader *shader = NewShader(vertexShaderPath, strlen(vertexShaderPath), fragmentShaderPath, strlen(fragmentShaderPath));
     ASSERT(shader != NULL);
     Bind(shader);
-    SetUniformMatrix4f(shader, "u_model_view_projection_matrix", projectionMatrix);
+    SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
 
     Texture *texture = NewTexture("..\\assets\\image.png");
     ASSERT(texture != NULL);
