@@ -86,18 +86,13 @@ int main()
     glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     // view matrix (identity matrix) with translation
     glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
-    // model matrix
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(200.0f, 200.0f, 0.0f));
-
-    // model view projection matrix
-    glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
 
     const char *vertexShaderPath = "shaders/vertex.glsl";
     const char *fragmentShaderPath = "shaders/fragment.glsl";
     Shader *shader = NewShader(vertexShaderPath, strlen(vertexShaderPath), fragmentShaderPath, strlen(fragmentShaderPath));
     ASSERT(shader != NULL);
     Bind(shader);
-    SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
 
     Texture *texture = NewTexture("..\\assets\\image.png");
     ASSERT(texture != NULL);
@@ -115,35 +110,24 @@ int main()
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    bool show_demo_window = true;
-    bool show_another_window = true;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    glm::vec3 translation(200.0f, 200.0f, 0.0f);
 
     while (!glfwWindowShouldClose(window))
     {
         Clear(&renderer);
         ImGui_ImplGlfwGL3_NewFrame();
 
+        // model matrix
+        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation);
+        // model view projection matrix
+        glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+
         Bind(shader);
         Draw(&renderer, vertexArray, indexBuffer, shader);
+        SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
 
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-            ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
+        ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f); 
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
