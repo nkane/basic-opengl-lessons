@@ -52,10 +52,10 @@ int main()
 
     float vertexBufferData[16] = 
     {
-         100.0f, 100.0f, 0.0f, 0.0f,  // 0
-         200.0f, 100.0f, 1.0f, 0.0f,  // 1
-         200.0f, 200.0f, 1.0f, 1.0f,  // 2
-         100.0f, 200.0f, 0.0f, 1.0f,  // 3
+         -50.0f, -50.0f, 0.0f, 0.0f,  // 0
+          50.0f, -50.0f, 1.0f, 0.0f,  // 1
+          50.0f,  50.0f, 1.0f, 1.0f,  // 2
+         -50.0f,  50.0f, 0.0f, 1.0f,  // 3
     };
 
     unsigned int indexBufferData[6] = 
@@ -85,8 +85,7 @@ int main()
     // projection matrix orthogonal
     glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     // view matrix (identity matrix) with translation
-    glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 0.0f));
-    
+    glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     const char *vertexShaderPath = "shaders/vertex.glsl";
     const char *fragmentShaderPath = "shaders/fragment.glsl";
@@ -110,23 +109,32 @@ int main()
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translation(200.0f, 200.0f, 0.0f);
+    glm::vec3 translationA(200.0f, 200.0f, 0.0f);
+    glm::vec3 translationB(400.0f, 200.0f, 0.0f);
 
     while (!glfwWindowShouldClose(window))
     {
         Clear(&renderer);
         ImGui_ImplGlfwGL3_NewFrame();
 
-        // model matrix
-        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translation);
-        // model view projection matrix
-        glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+        {
+            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationA);
+            glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+            Bind(shader);
+            SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
+            Draw(&renderer, vertexArray, indexBuffer, shader);
+        }
 
-        Bind(shader);
-        Draw(&renderer, vertexArray, indexBuffer, shader);
-        SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
+        {
+            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationB);
+            glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+            Bind(shader);
+            SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
+            Draw(&renderer, vertexArray, indexBuffer, shader);
+        }
 
-        ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f); 
+        ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
+        ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::Render();
