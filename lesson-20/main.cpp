@@ -22,6 +22,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+#include "tests/test_clear_color.cpp"
+
 int main()
 {
     GLFWwindow *window;
@@ -50,58 +52,8 @@ int main()
     }
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    float vertexBufferData[16] = 
-    {
-         -50.0f, -50.0f, 0.0f, 0.0f,  // 0
-          50.0f, -50.0f, 1.0f, 0.0f,  // 1
-          50.0f,  50.0f, 1.0f, 1.0f,  // 2
-         -50.0f,  50.0f, 0.0f, 1.0f,  // 3
-    };
-
-    unsigned int indexBufferData[6] = 
-    {
-        0, 1, 2, // right lower triangle
-        2, 3, 0, // left upper triangle
-    };
-
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC1_ALPHA));
     GLCall(glEnable(GL_BLEND));
-
-    VertexArray *vertexArray = NewVertexArray();
-    ASSERT(vertexArray != NULL);
-
-    VertexBuffer *vertexBuffer = NewVertexBuffer(vertexBufferData, 16 * sizeof(float));
-    ASSERT(vertexBuffer != NULL);
-
-    VertexBufferLayout *vertexBufferLayout = NewVertexBufferLayout(2);
-    ASSERT(vertexBufferLayout != NULL);
-    Push(vertexBufferLayout, GL_FLOAT, 2);
-    Push(vertexBufferLayout, GL_FLOAT, 2);
-    AddBuffer(vertexArray, vertexBuffer, vertexBufferLayout);
-
-    IndexBuffer *indexBuffer = NewIndexBuffer(indexBufferData, 6);
-    ASSERT(indexBuffer != NULL);
-
-    // projection matrix orthogonal
-    glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    // view matrix (identity matrix) with translation
-    glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
-    const char *vertexShaderPath = "shaders/vertex.glsl";
-    const char *fragmentShaderPath = "shaders/fragment.glsl";
-    Shader *shader = NewShader(vertexShaderPath, strlen(vertexShaderPath), fragmentShaderPath, strlen(fragmentShaderPath));
-    ASSERT(shader != NULL);
-    Bind(shader);
-
-    Texture *texture = NewTexture("..\\assets\\image.png");
-    ASSERT(texture != NULL);
-    Bind(texture, 0);
-    SetUniform1i(shader, "u_texture", 0);
-
-    Unbind(vertexArray);
-    Unbind(vertexBuffer);
-    Unbind(indexBuffer);
-    Unbind(shader);
 
     Renderer renderer = {};
 
@@ -109,33 +61,21 @@ int main()
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translationA(200.0f, 200.0f, 0.0f);
-    glm::vec3 translationB(400.0f, 200.0f, 0.0f);
+    Test_Clear_Color test = {};
+    test.r = 1.0f;
+    test.g = 0.0f;
+    test.b = 0.0f;
+    test.a = 1.0f;
 
     while (!glfwWindowShouldClose(window))
     {
         Clear(&renderer);
+
+        OnUpdate_Clear_Color(&test, 0.0f);
+        OnRender_Clear_Color(&test);
+
         ImGui_ImplGlfwGL3_NewFrame();
-
-        {
-            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationA);
-            glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-            Bind(shader);
-            SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
-            Draw(&renderer, vertexArray, indexBuffer, shader);
-        }
-
-        {
-            glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationB);
-            glm::mat4 modelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-            Bind(shader);
-            SetUniformMatrix4f(shader, "u_model_view_projection_matrix", modelViewProjectionMatrix);
-            Draw(&renderer, vertexArray, indexBuffer, shader);
-        }
-
-        ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
-        ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        OnImGuiRender_Clear_Color(&test);
 
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
@@ -147,18 +87,7 @@ int main()
     {
         ImGui_ImplGlfwGL3_Shutdown();
         ImGui::DestroyContext();
-        DeleteShader(shader);
-        DeleteVertexBuffer(vertexBuffer);
-        DeleteIndexBuffer(indexBuffer);
-        DeleteVertexArray(vertexArray);
-        DeleteTexture(texture);
         glfwTerminate();
-        free(vertexBuffer);
-        free(indexBuffer);
-        free(vertexArray);
-        free(vertexBufferLayout->Elements);
-        free(vertexBufferLayout);
-        free(texture);
     }
 
     return 0;
