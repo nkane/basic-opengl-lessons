@@ -22,7 +22,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-#include "tests/test_clear_color.cpp"
+#include "tests/test.cpp"
 
 int main()
 {
@@ -67,9 +67,15 @@ int main()
     clear_color_test.b = 0.0f;
     clear_color_test.a = 1.0f;
 
+    Test_Texture_2D *texture_2D_test =  Create_Test_Texture_2D();
+
     Test_Main_Menu menu = {};
     menu.Tests[1] = (unsigned long int*)&clear_color_test;
     menu.TestType[1] = CLEAR_COLOR;
+
+    menu.Tests[2] = (unsigned long int*)texture_2D_test;
+    menu.TestType[2] = TEXTURE_2D;
+
     menu.CurrentTestIndex = 0;
 
     while (!glfwWindowShouldClose(window))
