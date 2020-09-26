@@ -67,7 +67,7 @@ int main()
     clear_color_test.b = 0.0f;
     clear_color_test.a = 1.0f;
 
-    Test_Texture_2D *texture_2D_test =  Create_Test_Texture_2D();
+    Test_Texture_2D *texture_2D_test = NULL;
 
     Test_Main_Menu menu = {};
     menu.Tests[1] = (unsigned long int*)&clear_color_test;

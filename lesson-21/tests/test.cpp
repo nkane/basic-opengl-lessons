@@ -40,6 +40,11 @@ OnImGuiRender_Test_Menu(Test_Main_Menu *s)
 
         case TEXTURE_2D:
         {
+            if (s->Tests[i] == NULL)
+            {
+                s->Tests[i] = (unsigned long int *)Create_Test_Texture_2D();   
+                test = s->Tests[i];
+            }
             Test_Texture_2D *t = (Test_Texture_2D *)test;
             OnUpdate_Texture_2D(t);
             OnRender_Texture_2D(t);
@@ -47,6 +52,19 @@ OnImGuiRender_Test_Menu(Test_Main_Menu *s)
             if (ImGui::Button("Back"))
             {
                 s->CurrentTestIndex = MENU;
+                DeleteShader(t->Shader);
+                DeleteVertexBuffer(t->VertexBuffer);
+                DeleteIndexBuffer(t->IndexBuffer);
+                DeleteVertexArray(t->VertexArray);
+                DeleteTexture(t->Texture);
+                free(t->VertexBuffer);
+                free(t->IndexBuffer);
+                free(t->VertexArray);
+                free(t->VertexBufferLayout->Elements);
+                free(t->VertexBufferLayout);
+                free(t->Texture);
+                free(s->Tests[i]);
+                s->Tests[i] = NULL;
             }
             OnImGuiRender_Texture_2D(t);
             ImGui::End();
