@@ -269,8 +269,7 @@ Create_Test_Quad()
 void
 OnUpdate_Test_Quad(Test_Quad *t)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram();
+
 }
 
 void
