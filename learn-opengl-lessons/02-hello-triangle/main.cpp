@@ -50,6 +50,39 @@ main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    float vertices[9] =
+    {
+        -0.5f, -0.5f, 0.0f,
+         0.5f,  0.0f, 0.0f,
+         0.0f,  0.5f, 0.0f,
+    };
+
+    unsigned vertex_buffer_id;
+    glGenBuffers(1, &vertex_buffer_id);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    const char *vertex_shader_source = 
+    "#version 330 core\n"
+    "layout (location = 0) in vec3 position;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+    "}\0";
+    unsigned int vertex_shader_id;
+    vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader_id, 1, &vertex_shader_source, NULL);
+    glCompileShader(vertex_shader_id);
+
+    int success;
+    char info_logs[512];
+    glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertex_shader_id, 512, NULL, info_logs);
+        printf("[Error - Vertex Shader]: %s\n", info_logs);
+    }
+
     while (!glfwWindowShouldClose(window))
     {
         process_input(window);
