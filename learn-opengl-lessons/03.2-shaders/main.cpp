@@ -65,11 +65,12 @@ main()
     glBindVertexArray(vertex_array_id);
 
     // copy vertices array in a vertex buffer
-    float vertices[9] =
+    float vertices[18] =
     {
-        -0.5f, -0.5f,  0.0f,
-         0.5f, -0.5f,  0.0f,
-         0.0f,  0.5f,  0.0f,
+        // positions          // colors
+         0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f,     // bottom right
+        -0.5f, -0.5f,  0.0f,  0.0f, 1.0f, 0.0f,     // bottom left
+         0.0f,  0.5f,  0.0f,  0.0f, 0.0f, 1.0f,     // top
     };
     unsigned vertex_buffer_id;
     glGenBuffers(1, &vertex_buffer_id);
@@ -77,7 +78,7 @@ main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // copy index array in an element buffer (index buffer)
-    unsigned int indices[6] =
+    unsigned int indices[3] =
     {
         0, 1, 2, 
     };
@@ -87,16 +88,21 @@ main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // set vertex arrtribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // create vertex shader
     const char *vertex_shader_source = 
     "#version 330 core\n"
     "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec3 color;\n"
+    "out vec3 v_color;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = vec4(position, 1.0);\n"
+    "   v_color = color;\n"
     "}\0";
     unsigned int vertex_shader_id;
     vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
@@ -116,11 +122,11 @@ main()
     // create fragment shader
     const char *fragment_shader_source =
     "#version 330 core\n"
-    "out vec4 color;\n"
-    "uniform vec4 u_color;\n"
+    "out vec4 frag_color;\n"
+    "in vec3 v_color;\n"
     "void main()\n"
     "{\n"
-    "   color = u_color;\n"
+    "   frag_color = vec4(v_color, 1.0);\n"
     "}\0";
     unsigned int fragment_shader_id;
     fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);

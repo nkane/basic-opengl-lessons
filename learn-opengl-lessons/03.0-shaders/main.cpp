@@ -76,7 +76,7 @@ main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // copy index array in an element buffer (index buffer)
-    unsigned int indices[6] =
+    unsigned int indices[3] =
     {
         0, 1, 2, 
     };
