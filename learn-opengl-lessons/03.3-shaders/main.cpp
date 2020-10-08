@@ -8,7 +8,6 @@
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 
-
 static unsigned int WireFrameEnabled = 0;
 
 void
@@ -98,52 +97,6 @@ main()
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
 
-    unsigned int vertex_shader_id;
-    vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader_id, 1, &shader_program->vertex_file_buffer, NULL);
-    glCompileShader(vertex_shader_id);
-    int success;
-    char info_logs[512];
-    glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertex_shader_id, 512, NULL, info_logs);
-        printf("[Error - Vertex Shader]: %s\n", info_logs);
-        return -1;
-    }
-    memset(info_logs, 0, 512);
-
-    unsigned int fragment_shader_id;
-    fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader_id, 1, &shader_program->fragment_file_buffer, NULL);
-    glCompileShader(fragment_shader_id);
-    glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragment_shader_id, 512, NULL, info_logs);
-        printf("[Error - Fragment Shader]: %s\n", info_logs);
-    }
-    memset(info_logs, 0, 512);
-
-    // create shader program linking vertex and fragment shader
-    unsigned int shader_program_id;
-    shader_program_id = glCreateProgram();
-    glAttachShader(shader_program_id, vertex_shader_id);
-    glAttachShader(shader_program_id, fragment_shader_id);
-    glLinkProgram(shader_program_id);
-    glGetProgramiv(shader_program_id, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(shader_program_id, 512, NULL, info_logs);
-        printf("[Error - Program Linking]: %s\n", info_logs);
-    }
-    memset(info_logs, 0, 512);
-    {
-        // shaders no longer needed, since linked to program
-        glDeleteShader(vertex_shader_id);
-        glDeleteShader(fragment_shader_id);
-    }
-
     glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window))
@@ -162,14 +115,13 @@ main()
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
 
-            glUseProgram(shader_program_id);
+            glUseProgram(shader_program->id);
 
             // set uniform
             float time_value = glfwGetTime();
             float green_channel = (sin(time_value) / 2.0f) + 0.5f;
-            int vertex_color_uniform_id = glGetUniformLocation(shader_program_id, "u_color");
-            
-            glUniform4f(vertex_color_uniform_id, 0.0f, green_channel, 0.0f, 1.0f);
+            float color_uniform[4] = { 0.0f, green_channel, 0.0f, 1.0f };
+            SetFloat4Uniform(shader_program, "u_color", color_uniform);
             glBindVertexArray(vertex_array_id);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
@@ -178,10 +130,10 @@ main()
     }
     
     {
+        ReleaseShaderProgram(shader_program);
         glDeleteVertexArrays(1, &vertex_array_id);
         glDeleteBuffers(1, &vertex_buffer_id);
         glDeleteBuffers(1, &index_buffer_id);
-        glDeleteProgram(shader_program_id);
         glfwTerminate();
     }
     

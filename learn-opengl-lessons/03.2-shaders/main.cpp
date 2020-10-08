@@ -176,15 +176,7 @@ main()
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
-
             glUseProgram(shader_program_id);
-
-            // set uniform
-            float time_value = glfwGetTime();
-            float green_channel = (sin(time_value) / 2.0f) + 0.5f;
-            int vertex_color_uniform_id = glGetUniformLocation(shader_program_id, "u_color");
-            
-            glUniform4f(vertex_color_uniform_id, 0.0f, green_channel, 0.0f, 1.0f);
             glBindVertexArray(vertex_array_id);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
