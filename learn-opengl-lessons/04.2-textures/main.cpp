@@ -147,6 +147,7 @@ main()
     glEnableVertexAttribArray(2);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
+    glUseProgram(shader_program->id);
     SetIntUniform(shader_program, "u_texture_1", 0);
     SetIntUniform(shader_program, "u_texture_2", 1);
 

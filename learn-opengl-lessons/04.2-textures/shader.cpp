@@ -32,7 +32,7 @@ CreateShaderProgram(const char *vertex_shader_path, const char *fragment_shader_
     file_length = ftell(vertex_shader_file);
     fseek(vertex_shader_file, 0L, SEEK_SET);
     Result->vertex_file_buffer = (char *)malloc(file_length * sizeof(char) + 1);
-    Result->vertex_file_buffer[file_length + 1] = NULL;
+    memset(Result->vertex_file_buffer, 0, file_length + 1);
     fread(Result->vertex_file_buffer, sizeof(char), file_length, vertex_shader_file);
     file_length = 0;
 
@@ -48,7 +48,7 @@ CreateShaderProgram(const char *vertex_shader_path, const char *fragment_shader_
     file_length = ftell(fragment_shader_file);
     fseek(fragment_shader_file, 0L, SEEK_SET);
     Result->fragment_file_buffer = (char *)malloc(file_length * sizeof(char) + 1);
-    Result->fragment_file_buffer[file_length + 1] = NULL; 
+    memset(Result->fragment_file_buffer, 0, file_length + 1);
     fread(Result->fragment_file_buffer, sizeof(char), file_length, fragment_shader_file);
 
     fclose(vertex_shader_file);
