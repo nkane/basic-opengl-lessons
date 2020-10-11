@@ -1,6 +1,6 @@
 /*
  * Exercise 1
- * - Make sure only the happy face looks in the other/reverse direction by changing the fragment shaderc
+ * - Make sure only the happy face looks in the other/reverse direction by changing the fragment shader
  */
 
 #include <stdio.h>
