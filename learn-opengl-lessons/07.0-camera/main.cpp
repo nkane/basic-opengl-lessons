@@ -1,8 +1,3 @@
-/*
- * Exercise 3
- * - Try to make every 3rd container (including the 1st) rotate over time, while leaving the other containers static using just the model matrix
- */
-
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -244,11 +239,13 @@ main()
                     angle = 20.0f * i;
                 }
                 model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+                const float radius = 10.0f;
+                float camera_x = sin(glfwGetTime()) * radius;
+                float camera_z = cos(glfwGetTime()) * radius;
                 glm::mat4 view = glm::mat4(1.0f);
-                view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+                view = glm::lookAt(glm::vec3(camera_x, 0.0f, camera_z),
                                    glm::vec3(0.0f, 0.0f, 0.0f),
                                    glm::vec3(0.0f, 1.0f, 0.0f));
-                view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
                 glm::mat4 perspective_projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
                 SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
                 SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
