@@ -25,8 +25,8 @@
 
 static unsigned int WireFrameEnabled = 0;
 
+static Camera *camera = NULL;
 static glm::vec3 camera_position   = glm::vec3(0.0f, 0.0f, 3.0f);
-static glm::vec3 camera_front      = glm::vec3(0.0f, 0.0f, -1.0f);
 static glm::vec3 camera_up         = glm::vec3(0.0f, 1.0f, 0.0f);
 static float delta_time = 0.0f;
 static float last_frame = 0.0f;
@@ -34,8 +34,6 @@ static float last_frame = 0.0f;
 static float yaw = -90.0f;
 static float pitch = 0.0f;
 static glm::vec3 direction;
-
-static float zoom = 90.0f;
 
 void
 framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -59,22 +57,22 @@ process_input(GLFWwindow *window)
     const float camera_speed = 2.5f * delta_time;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera_position += camera_speed * camera_front;
+        ProcessKeyboard(camera, FORWARD, delta_time);
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera_position -= camera_speed * camera_front;
+        ProcessKeyboard(camera, BACKWARD, delta_time);
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera_position -= glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+        ProcessKeyboard(camera, LEFT, delta_time);
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera_position += glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+        ProcessKeyboard(camera, RIGHT, delta_time);
     }
 }
 
@@ -95,35 +93,13 @@ mouse_callback(GLFWwindow *window, double x, double y)
     float y_offset = last_y - y;
     last_x = x;
     last_y = y;
-
-    const float sensitivity = 0.1f;
-    x_offset *= sensitivity;
-    y_offset *= sensitivity;
-
-    yaw += x_offset;
-    pitch += y_offset;
-    if (pitch > 89.0f)
-    {
-        pitch = 89.0f;
-    }  
-    if (pitch < -89.0f)
-    {
-        pitch = -89.0f;
-    }
+    ProcessMouseMovement(camera, x_offset, y_offset, true);
 }
 
 void
 scroll_callback(GLFWwindow *window, double x_offset, double y_offset)
 {
-    zoom -= (float)y_offset;
-    if (zoom < 1.0f)
-    {
-        zoom = 1.0f;
-    }
-    if (zoom > 90.0f)
-    {
-        zoom = 90.0f;
-    }
+    ProcessMouseScroll(camera, (float)y_offset);
 }
 
 int
@@ -288,6 +264,7 @@ main()
         glm::vec3(-1.3f,  1.0f, -1.5f) 
     };
 
+    camera = CreateCamera(camera_position, camera_up, yaw, pitch);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -325,17 +302,11 @@ main()
                     angle = 20.0f * i;
                 }
                 model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-                const float radius = 10.0f;
-                float camera_x = sin(glfwGetTime()) * radius;
-                float camera_z = cos(glfwGetTime()) * radius;
-                direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-                direction.y = sin(glm::radians(pitch));
-                direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-                camera_front = glm::normalize(direction);
+
                 glm::mat4 view = glm::mat4(1.0f);
-                view = glm::lookAt(camera_position, camera_position + camera_front, camera_up);
-                float fov = zoom;
-                glm::mat4 perspective_projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 100.0f);
+                view = GetViewMatrix(camera);
+
+                glm::mat4 perspective_projection = glm::perspective(glm::radians(camera->zoom), (float)width / (float)height, 0.1f, 100.0f);
                 SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
                 SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
                 SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));

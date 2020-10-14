@@ -32,6 +32,18 @@ struct Camera
     float zoom;
 };
 
+void
+UpdateCameraVectors(Camera *c)
+{
+    glm::vec3 front;
+    front.x = cos(glm::radians(c->yaw)) * cos(glm::radians(c->pitch));
+    front.y = sin(glm::radians(c->pitch));
+    front.z = sin(glm::radians(c->yaw)) * cos(glm::radians(c->pitch));
+    c->front = glm::normalize(front);
+    c->right = glm::normalize(glm::cross(c->front, c->world_up));
+    c->up    = glm::normalize(glm::cross(c->right, c->front));
+}
+
 Camera *
 CreateCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 {
@@ -40,10 +52,83 @@ CreateCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     {
         return NULL;
     }
-    // set defaults
-    Result->position = glm::vec3(0.0f, 0.0f, 0.0f);
-    Result->up = glm::vec3(0.0f, 0.0f, 0.0f);
-    Result->yaw = YAW;
-    Result->pitch = PITCH;
+    //memset(Result, 0, sizeof(Camera));
+    Result->position = position;
+    Result->world_up = up;
+    Result->yaw = yaw;
+    Result->pitch = pitch;
+    Result->movement_speed = SPEED;
+    Result->mouse_sensitivity = SENSITIVITY;
+    Result->zoom = ZOOM;
+    UpdateCameraVectors(Result);
     return Result;
+}
+
+glm::mat4
+GetViewMatrix(Camera *c)
+{
+    return glm::lookAt(c->position, c->position + c->front, c->up);
+}
+
+void
+ProcessKeyboard(Camera *c, Camera_Movement direction, float delta_time)
+{
+    float velocity = c->movement_speed * delta_time;
+    switch (direction)
+    {
+        case FORWARD:
+        {
+            c->position += c->front * velocity;
+        } break;
+
+        case BACKWARD:
+        {
+            c->position -= c->front * velocity;
+        } break;
+
+        case LEFT:
+        {
+            c->position -= c->right * velocity;
+        } break;
+
+        case RIGHT:
+        {
+            c->position += c->right * velocity;
+        } break;
+    }
+}
+
+void
+ProcessMouseMovement(Camera *c, float x_offset, float y_offset, GLboolean constraintPitch)
+{
+    x_offset *= c->mouse_sensitivity;
+    y_offset *= c->mouse_sensitivity;
+    c->yaw += x_offset;
+    c->pitch += y_offset;
+    if (constraintPitch)
+    {
+        if (c->pitch > 89.0f)
+        {
+            c->pitch = 89.0f;
+        }
+        if (c->pitch < -89.0f)
+        {
+            c->pitch = -89.0f;
+        }
+    }
+    UpdateCameraVectors(c);
+}
+
+void
+ProcessMouseScroll(Camera *c, float y_offset)
+{
+    c->zoom -= y_offset;
+    if (c->zoom < 1.0f)
+    {
+        c->zoom = 1.0f;
+    }
+    if (c->zoom > 45.0f)
+    {
+        c->zoom = 45.0f;
+    }
 }
