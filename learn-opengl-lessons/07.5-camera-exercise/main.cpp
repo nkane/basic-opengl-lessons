@@ -1,3 +1,10 @@
+/*
+ * Exercise 1
+ * - See if you can transform the camera class in such a way that it becomes
+ *   a true fps camera where you cannot fly; you can only look around while
+ *   staying on the xz plane
+ */
+
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
