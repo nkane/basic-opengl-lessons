@@ -96,6 +96,8 @@ ProcessKeyboard(Camera *c, Camera_Movement direction, float delta_time)
             c->position += c->right * velocity;
         } break;
     }
+    // this keeps the camera on the x-z plane
+    c->position.y = 0.0f;
 }
 
 void
