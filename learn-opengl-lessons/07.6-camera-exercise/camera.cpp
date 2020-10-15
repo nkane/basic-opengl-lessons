@@ -97,10 +97,13 @@ GetViewMatrix(Camera *c)
 glm::mat4
 CustomGetViewMatrix(Camera *c)
 {
+#if 0
     const float radius = 10.0f;
     float cam_x = sin(glfwGetTime()) * radius;
     float cam_z = cos(glfwGetTime()) * radius;
     return LookAt(glm::vec3(cam_x, 0.0f, cam_z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+#endif
+    return LookAt(c->position, c->position + c->front, c->up);
 }
 
 void
