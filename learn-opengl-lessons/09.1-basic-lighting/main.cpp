@@ -249,7 +249,7 @@ main()
             glBindVertexArray(vertex_array_id);
             model = glm::mat4(1.0f);
             model = glm::translate(model, cube_position);
-            float angle = 0.0f;
+            float angle = 20.0f;
             model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
             SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
