@@ -209,8 +209,8 @@ main()
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 cube_position(0.0f,  0.0f,  0.0f);
-    glm::vec3 light_position(1.2f, 1.0f, 2.0f);
+    glm::vec3 cube_position(0.0f,  0.0f, 0.0f);
+    glm::vec3 light_position(2.0f, 0.25f, 0.0);
     camera = CreateCamera(camera_position, camera_up, yaw, pitch);
 
     while (!glfwWindowShouldClose(window))
@@ -255,6 +255,7 @@ main()
             SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
             SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
             SetFloatVec3Uniform(shader_program, "u_light_position", light_position);
+            SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             float current_frame = glfwGetTime();
             delta_time = current_frame - last_frame;
