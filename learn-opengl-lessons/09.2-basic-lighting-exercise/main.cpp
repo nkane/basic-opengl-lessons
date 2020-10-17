@@ -245,7 +245,7 @@ main()
             glBindVertexArray(vertex_array_light_id);
             model = glm::mat4(1.0f);
             static float radius = 2.0f;
-            static float increment_amount = -0.1f;
+            static float increment_amount = -0.25f;
             radius += increment_amount * delta_time;
             if (radius < 1.0f || radius > 5.0f)
             {
