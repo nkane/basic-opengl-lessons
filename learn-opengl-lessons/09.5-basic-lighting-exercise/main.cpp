@@ -1,6 +1,9 @@
 /*
- * Exercise 3
- * - Do Phong shading in view space instead of world space.
+ * Exercise 4
+ * - Implement Gouraud shading instead of Phong shading.
+ *   If you did things right the lighting should look a
+ *   bit off (especially the specular highlights) with
+ *   the cube object. Try to reason why it looks so weird.
  */
 
 #include <stdio.h>
