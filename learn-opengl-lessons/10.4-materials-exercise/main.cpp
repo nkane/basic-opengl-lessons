@@ -11,6 +11,7 @@
 
 #include "shader.cpp"
 #include "camera.cpp"
+#include "material.cpp"
 
 #define GLEW_STATIC
 #include <GL\glew.h>
@@ -207,11 +208,6 @@ main()
     glEnableVertexAttribArray(0);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
-    glUseProgram(shader_program->id);
-    SetFloatVec3Uniform(shader_program, "u_material.ambient_light", glm::vec3(1.0f, 0.5f, 0.31f));
-    SetFloatVec3Uniform(shader_program, "u_material.diffuse_light", glm::vec3(1.0f, 0.5f, 0.31f));
-    SetFloatVec3Uniform(shader_program, "u_material.specular_highlight", glm::vec3(0.5f, 0.5f, 0.5f));
-    SetFloatUniform(shader_program, "u_material.shininess", 32.0f);
 
     ShaderProgram *light_shader_program = CreateShaderProgram("shaders/vertex_light_source.glsl", "shaders/fragment_light_source.glsl");
 
@@ -250,6 +246,17 @@ main()
         glm::vec3(12.0f, -2.0f, 0.0f),
     };
 
+    Material materials[] = 
+    {
+        Material 
+        {
+            glm::vec3(0.0215f, 0.1745f, 0.0215f),
+            glm::vec3(0.07568f,	0.61424f, 0.07568f),
+            glm::vec3(0.633f, 0.727811f, 0.633f),
+            32.0f,
+        },
+    };
+
     while (!glfwWindowShouldClose(window))
     {
         process_input(window);
@@ -286,21 +293,21 @@ main()
             glBindVertexArray(vertex_array_id);
             for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); i++) 
             {
+                SetFloatVec3Uniform(shader_program, "u_material.ambient_light", materials[0].ambient);
+                SetFloatVec3Uniform(shader_program, "u_material.diffuse_light", materials[0].diffuse);
+                SetFloatVec3Uniform(shader_program, "u_material.specular_highlight", materials[0].specular);
+                SetFloatUniform(shader_program, "u_material.shininess", materials[0].shininess);
+
                 model = glm::mat4(1.0f);
                 model = glm::translate(model, cube_positions[i]);
+
                 SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
                 SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
                 SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
                 SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
                 SetFloatVec3Uniform(shader_program, "u_light.position", light_position);
-                glm::vec3 light_color;
-                light_color.x = sin(glfwGetTime() * 2.0f);
-                light_color.y = sin(glfwGetTime() * 0.7f);
-                light_color.z = sin(glfwGetTime() * 1.3f);
-                glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
-                glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
-                SetFloatVec3Uniform(shader_program, "u_light.ambient", ambient_color);
-                SetFloatVec3Uniform(shader_program, "u_light.diffuse", diffuse_color);
+                SetFloatVec3Uniform(shader_program, "u_light.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+                SetFloatVec3Uniform(shader_program, "u_light.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
                 SetFloatVec3Uniform(shader_program, "u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
