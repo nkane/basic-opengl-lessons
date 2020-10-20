@@ -28,7 +28,7 @@ static unsigned int width = 800;
 static unsigned int height = 600;
 
 static Camera *camera = NULL;
-static glm::vec3 camera_position   = glm::vec3(0.0f, 0.0f, 6.0f);
+static glm::vec3 camera_position   = glm::vec3(0.0f, 0.0f, 25.0f);
 static glm::vec3 camera_up         = glm::vec3(0.0f, 1.0f, 0.0f);
 static float delta_time = 0.0f;
 static float last_frame = 0.0f;
@@ -218,9 +218,37 @@ main()
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 cube_position(0.0f,  0.0f, 0.0f);
-    glm::vec3 light_position(0.0f, 0.0f, 0.0f);
+    glm::vec3 light_position(0.0f, 2.0f, 1.5f);
     camera = CreateCamera(camera_position, camera_up, yaw, pitch);
+
+    glm::vec3 cube_positions[] =
+    {
+        glm::vec3(-10.0f, 0.0f, 0.0f),
+        glm::vec3(-8.0f, 0.0f, 0.0f),
+        glm::vec3(-6.0f, 0.0f, 0.0f),
+        glm::vec3(-4.0f, 0.0f, 0.0f),
+        glm::vec3(-2.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 0.0f, 0.0f),
+        glm::vec3(4.0f, 0.0f, 0.0f),
+        glm::vec3(6.0f, 0.0f, 0.0f),
+        glm::vec3(8.0f, 0.0f, 0.0f),
+        glm::vec3(10.0f, 0.0f, 0.0f),
+        glm::vec3(12.0f, 0.0f, 0.0f),
+
+        glm::vec3(-10.0f, -2.0f, 0.0f),
+        glm::vec3(-8.0f, -2.0f, 0.0f),
+        glm::vec3(-6.0f, -2.0f, 0.0f),
+        glm::vec3(-4.0f, -2.0f, 0.0f),
+        glm::vec3(-2.0f, -2.0f, 0.0f),
+        glm::vec3(0.0f, -2.0f, 0.0f),
+        glm::vec3(2.0f, -2.0f, 0.0f),
+        glm::vec3(4.0f, -2.0f, 0.0f),
+        glm::vec3(6.0f, -2.0f, 0.0f),
+        glm::vec3(8.0f, -2.0f, 0.0f),
+        glm::vec3(10.0f, -2.0f, 0.0f),
+        glm::vec3(12.0f, -2.0f, 0.0f),
+    };
 
     while (!glfwWindowShouldClose(window))
     {
@@ -246,15 +274,6 @@ main()
             glUseProgram(light_shader_program->id);
             glBindVertexArray(vertex_array_light_id);
             model = glm::mat4(1.0f);
-            static float radius = 2.0f;
-            static float increment_amount = -0.25f;
-            radius += increment_amount * delta_time;
-            if (radius < 1.0f || radius > 5.0f)
-            {
-                increment_amount *= -1.0f;
-            }
-            light_position.x = radius * cos(glfwGetTime());
-            light_position.z = radius * sin(glfwGetTime());
             model = glm::translate(model, light_position);
             model = glm::scale(model, glm::vec3(0.2f));
             SetFloatMat4Uniform(light_shader_program, "u_model", glm::value_ptr(model));
@@ -265,27 +284,27 @@ main()
             // render cubes
             glUseProgram(shader_program->id);
             glBindVertexArray(vertex_array_id);
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cube_position);
-            SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
-            SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
-            SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
-            SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
-            SetFloatVec3Uniform(shader_program, "u_light.position", light_position);
+            for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); i++) 
+            {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, cube_positions[i]);
+                SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
+                SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
+                SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
+                SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
+                SetFloatVec3Uniform(shader_program, "u_light.position", light_position);
+                glm::vec3 light_color;
+                light_color.x = sin(glfwGetTime() * 2.0f);
+                light_color.y = sin(glfwGetTime() * 0.7f);
+                light_color.z = sin(glfwGetTime() * 1.3f);
+                glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
+                glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
+                SetFloatVec3Uniform(shader_program, "u_light.ambient", ambient_color);
+                SetFloatVec3Uniform(shader_program, "u_light.diffuse", diffuse_color);
+                SetFloatVec3Uniform(shader_program, "u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
 
-            glm::vec3 light_color;
-            light_color.x = sin(glfwGetTime() * 2.0f);
-            light_color.y = sin(glfwGetTime() * 0.7f);
-            light_color.z = sin(glfwGetTime() * 1.3f);
-
-            glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
-            glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
-
-            SetFloatVec3Uniform(shader_program, "u_light.ambient", ambient_color);
-            SetFloatVec3Uniform(shader_program, "u_light.diffuse", diffuse_color);
-            SetFloatVec3Uniform(shader_program, "u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
             float current_frame = glfwGetTime();
             delta_time = current_frame - last_frame;
             last_frame = current_frame;
