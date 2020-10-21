@@ -28,7 +28,7 @@ uniform Light u_light;
 void main()
 {
     // ambient
-    vec3 ambient = u_light.ambient;
+    vec3 ambient = u_light.ambient * vec3(texture(u_material.diffuse, v_texture_coordinates));
 
     // diffuse
     vec3 norm = normalize(v_normal);
@@ -44,4 +44,5 @@ void main()
 
     vec3 result = ambient + diffuse + specular;
     v_frag_color = vec4(result, 1.0);
+    //v_frag_color  = vec4(vec3(texture(u_material.diffuse, v_texture_coordinates)), 1.0);
 }

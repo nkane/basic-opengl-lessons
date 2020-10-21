@@ -135,6 +135,7 @@ main()
     int texture_width;
     int texture_height;
     int texture_channels;
+    stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load("assets/container2.png", &texture_width, &texture_height, &texture_channels, 0);
     if (!data)
     {
@@ -152,7 +153,6 @@ main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width, texture_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
-    stbi_set_flip_vertically_on_load(true);
 
     // bind vertex array
     unsigned int vertex_array_id;
@@ -215,14 +215,14 @@ main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     unsigned int vertex_array_light_id;
     glGenVertexArrays(1, &vertex_array_light_id);
     glBindVertexArray(vertex_array_light_id);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
@@ -240,10 +240,13 @@ main()
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 light_position(0.0f, -1.0f, 1.5f);
+    glm::vec3 light_position(0.0f, 1.0f, 1.5f);
     camera = CreateCamera(camera_position, camera_up, yaw, pitch);
 
-    glm::vec3 cube_position = glm::vec3(-10.0f, 0.0f, 0.0f);
+    glm::vec3 cube_position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    glUseProgram(shader_program->id);
+    SetIntUniform(shader_program, "u_material.diffuse", 0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -272,7 +275,7 @@ main()
             static float x = 0.0f;
             static float increment_amount = -2.0f;
             x += increment_amount * delta_time;
-            if (x < -12.0f || x > 14.0f)
+            if (x < -2.0f || x > 2.0f)
             {
                 increment_amount *= -1.0f;
             }
@@ -287,11 +290,10 @@ main()
             // render cubes
             glUseProgram(shader_program->id);
             glBindVertexArray(vertex_array_id);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, container_texture_id);
-            SetIntUniform(shader_program, "u_material.diffuse", 0);
             SetFloatVec3Uniform(shader_program, "u_material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
             SetFloatUniform(shader_program, "u_material.shininess", 64.0f);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, container_texture_id);
             model = glm::mat4(1.0f);
             model = glm::translate(model, cube_position);
             SetFloatMat4Uniform(shader_program, "u_model", glm::value_ptr(model));
