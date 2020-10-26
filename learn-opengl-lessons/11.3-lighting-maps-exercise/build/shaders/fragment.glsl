@@ -40,7 +40,8 @@ void main()
     vec3 view_direction = normalize(u_view_position - v_fragment_position);
     vec3 reflection_direction = reflect(-light_directoin, norm);
     float spec = pow(max(dot(view_direction, reflection_direction), 0.0), u_material.shininess);
-    vec3 specular = u_light.specular * spec * vec3(texture(u_material.specular, v_texture_coordinates));
+    vec3 specular = u_light.specular * spec * (vec3(1.0) - vec3(texture(u_material.specular, v_texture_coordinates)));
+    //vec3 specular = u_light.specular * spec * vec3(texture(u_material.specular, v_texture_coordinates));
 
     vec3 result = ambient + diffuse + specular;
     v_frag_color = vec4(result, 1.0);

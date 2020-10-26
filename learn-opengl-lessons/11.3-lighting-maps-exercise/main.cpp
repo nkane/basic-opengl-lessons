@@ -268,7 +268,7 @@ main()
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 light_position(0.0f, 1.0f, 1.5f);
+    glm::vec3 light_position(0.0f, 0.25f, 1.5f);
     camera = CreateCamera(camera_position, camera_up, yaw, pitch);
 
     glm::vec3 cube_position = glm::vec3(0.0f, 0.0f, 0.0f);
