@@ -51,6 +51,14 @@ void main()
         vec3 reflection_direction = reflect(-light_direction, norm);
         float spec = pow(max(dot(view_direction, reflection_direction), 0.0), u_material.shininess);
         vec3 specular = u_light.specular * spec * texture(u_material.specular, v_texture_coordinates).rgb;
+
+        float distance    = length(u_light.position - v_fragment_position);
+        float attenuation = 1.0 / (u_light.constant + u_light.linear * distance + u_light.quadratic * (distance * distance));    
+        // remove attenuation from ambient, as otherwise at large distances the light would be darker inside than outside the spotlight due the ambient term in the else branche
+        // ambient  *= attenuation;
+        diffuse   *= attenuation;
+        specular *= attenuation;   
+
         result = ambient + diffuse + specular;
     }
     else 
