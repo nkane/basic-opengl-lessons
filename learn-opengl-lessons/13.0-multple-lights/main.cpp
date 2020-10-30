@@ -244,6 +244,14 @@ main()
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    glm::vec3 point_light_positions[] =
+    {
+        glm::vec3( 0.7f,  0.2f,  2.0f),
+        glm::vec3( 2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3( 0.0f,  0.0f, -3.0f)
+    };
+
     unsigned vertex_buffer_id;
     glGenBuffers(1, &vertex_buffer_id);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
@@ -300,34 +308,85 @@ main()
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
-            glm::mat4 view = glm::mat4(1.0f);
-            view = CustomGetViewMatrix(camera);
-            glm::mat4 perspective_projection = glm::perspective(glm::radians(camera->zoom), (float)width / (float)height, 0.1f, 100.0f);
             glm::mat4 model = glm::mat4(1.0f);
 
             // render cubes
             glUseProgram(shader_program->id);
             glBindVertexArray(vertex_array_id);
-
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, container_texture.id);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, container_metal_outline_texture.id);
+            SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
+            SetFloatUniform(shader_program, "u_material.shininess", 32.0f);
+            /*
+             *  here we set all the uniforms for the 5/6 types of light we have. we have to set them manually and index
+             *  the proper point light struct array to set each uniform variable. this can be done more code-friendly
+             *  by defining light types as classes and set their values in there, or by using a more efficient uniform approach
+             *  by using 'uniform buffer ojects', but this is something we'll discuss in the 'Advanced GLSL' tutorial.
+             */
+            // directional light
+            SetFloatVec3Uniform(shader_program, "u_directional_light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+            SetFloatVec3Uniform(shader_program, "u_directional_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_directional_light.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+            SetFloatVec3Uniform(shader_program, "u_directional_light.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+            // point light 1
+            SetFloatVec3Uniform(shader_program, "u_point_lights[0].position", point_light_positions[0]);
+            SetFloatVec3Uniform(shader_program, "u_point_lights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_point_lights[0].constant", 1.0f);
+            SetFloatUniform(shader_program, "u_point_lights[0].linear", 0.09f);
+            SetFloatUniform(shader_program, "u_point_lights[0].quadratic", 0.032f);
+            // point light 2
+            SetFloatVec3Uniform(shader_program, "u_point_lights[1].position", point_light_positions[1]);
+            SetFloatVec3Uniform(shader_program, "u_point_lights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_point_lights[1].constant", 1.0f);
+            SetFloatUniform(shader_program, "u_point_lights[1].linear", 0.09f);
+            SetFloatUniform(shader_program, "u_point_lights[1].quadratic", 0.032f);
+            // point light 3 
+            SetFloatVec3Uniform(shader_program, "u_point_lights[2].position", point_light_positions[2]);
+            SetFloatVec3Uniform(shader_program, "u_point_lights[2].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[2].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_point_lights[2].constant", 1.0f);
+            SetFloatUniform(shader_program, "u_point_lights[2].linear", 0.09f);
+            SetFloatUniform(shader_program, "u_point_lights[2].quadratic", 0.032f);
+            // point light 4 
+            SetFloatVec3Uniform(shader_program, "u_point_lights[3].position", point_light_positions[2]);
+            SetFloatVec3Uniform(shader_program, "u_point_lights[3].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[3].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[3].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_point_lights[3].constant", 1.0f);
+            SetFloatUniform(shader_program, "u_point_lights[3].linear", 0.09f);
+            SetFloatUniform(shader_program, "u_point_lights[3].quadratic", 0.032f);
+            // point light 4 
+            SetFloatVec3Uniform(shader_program, "u_point_lights[4].position", point_light_positions[2]);
+            SetFloatVec3Uniform(shader_program, "u_point_lights[4].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[4].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+            SetFloatVec3Uniform(shader_program, "u_point_lights[4].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_point_lights[4].constant", 1.0f);
+            SetFloatUniform(shader_program, "u_point_lights[4].linear", 0.09f);
+            SetFloatUniform(shader_program, "u_point_lights[4].quadratic", 0.032f);
+            // spotlight
+            SetFloatVec3Uniform(shader_program, "u_spot_light.position", camera->position);
+            SetFloatVec3Uniform(shader_program, "u_spot_light.direction", camera->front);
+            SetFloatVec3Uniform(shader_program, "u_spot_light.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+            SetFloatVec3Uniform(shader_program, "u_spot_light.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatVec3Uniform(shader_program, "u_spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            SetFloatUniform(shader_program, "u_spot_light.constant", 1.0f);
+            SetFloatUniform(shader_program, "u_spot_light.linear", 0.09f);
+            SetFloatUniform(shader_program, "u_spot_light.quadratic", 0.032f);
+            SetFloatUniform(shader_program, "u_spot_light.cut_off", glm::cos(glm::radians(12.5f)));
+            SetFloatUniform(shader_program, "u_spot_light.outer_cut_off", glm::cos(glm::radians(15.5f)));
+            // view and projection tranformations
+            glm::mat4 view = glm::mat4(1.0f);
+            view = CustomGetViewMatrix(camera);
+            glm::mat4 perspective_projection = glm::perspective(glm::radians(camera->zoom), (float)width / (float)height, 0.1f, 100.0f);
             SetFloatMat4Uniform(shader_program, "u_view", glm::value_ptr(view));
             SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
-            SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
-            SetFloatVec3Uniform(shader_program, "u_light.position", camera->position);
-            SetFloatVec3Uniform(shader_program, "u_light.direction", camera->front);
-            SetFloatVec3Uniform(shader_program, "u_light.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-            SetFloatVec3Uniform(shader_program, "u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-            SetFloatVec3Uniform(shader_program, "u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-            SetFloatUniform(shader_program, "u_light.cut_off", glm::cos(glm::radians(12.5f)));
-            SetFloatUniform(shader_program, "u_light.outer_cut_off", glm::cos(glm::radians(17.5f)));
-            SetFloatUniform(shader_program, "u_light.constant", 1.0f);
-            SetFloatUniform(shader_program, "u_light.linear", 0.09f);
-            SetFloatUniform(shader_program, "u_light.quadratic", 0.032f);
-            SetFloatUniform(shader_program, "u_material.shininess", 32.0f);
-
             for (unsigned int i = 0; i < 10; i++) 
             {
                 model = glm::mat4(1.0f);
@@ -341,6 +400,20 @@ main()
             float current_frame = glfwGetTime();
             delta_time = current_frame - last_frame;
             last_frame = current_frame;
+
+            // render lamps
+            glUseProgram(light_shader_program->id);
+            glBindVertexArray(vertex_array_light_id);
+            SetFloatMat4Uniform(light_shader_program, "u_view", glm::value_ptr(view));
+            SetFloatMat4Uniform(light_shader_program, "u_projection", glm::value_ptr(perspective_projection));
+            for (unsigned int i = 0; i < 4; i++)
+            {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, point_light_positions[i]);
+                model = glm::scale(model, glm::vec3(0.2f));
+                SetFloatMat4Uniform(light_shader_program, "u_model", glm::value_ptr(model));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
         }
         glfwPollEvents();
         glfwSwapBuffers(window);
