@@ -11,6 +11,7 @@
 #include "camera.cpp"
 #include "material.cpp"
 #include "texture.cpp"
+#include "mesh.cpp"
 
 #define GLEW_STATIC
 #include <GL\glew.h>
