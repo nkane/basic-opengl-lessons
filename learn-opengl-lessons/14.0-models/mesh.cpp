@@ -73,7 +73,7 @@ CreateMesh(Vertex *vertices, int vertices_length, unsigned int *indices, int ind
 }
 
 void
-DrawMesh(Mesh *m, ShaderProgram *shader)
+DrawMesh(Mesh *m, ShaderProgram *shader_program)
 {
 
 }
