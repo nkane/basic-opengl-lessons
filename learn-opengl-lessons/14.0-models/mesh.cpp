@@ -13,7 +13,7 @@ typedef struct _vertex
 typedef struct _mesh_texture 
 {
     unsigned int id;
-    const char *type;
+    char *type;
 } MeshTexture;
 
 typedef struct _mesh 
@@ -75,5 +75,31 @@ CreateMesh(Vertex *vertices, int vertices_length, unsigned int *indices, int ind
 void
 DrawMesh(Mesh *m, ShaderProgram *shader_program)
 {
-
+    unsigned int diffuse_number = 1;
+    unsigned int specular_number = 1;
+    char buffer[256] = {};
+    int number = 0;
+    for (unsigned int i = 0; i < m->textures_length; i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        memset(buffer, 0, 256);
+        char *name = m->textures[i].type;
+        strcat(buffer, "material.");
+        strcat(buffer, name);
+        if (strcmp(name, "texture_diffuse") == 0)
+        {
+            number = diffuse_number++;
+        }
+        else if (strcmp(name, "texture_specular") == 0)
+        {
+            number = specular_number++;
+        }
+        sprintf(buffer, "%s_%d", buffer, number);
+        SetFloatUniform(shader_program, (const char *)buffer, i);
+        glBindTexture(GL_TEXTURE_2D, m->textures[i].id);
+    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(m->vertex_array_id);
+    glDrawElements(GL_TRIANGLES, m->indices_length, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
