@@ -1,5 +1,5 @@
 /*
- *  Multiple Lights
+ *  models
  */
 
 
@@ -12,6 +12,7 @@
 #include "material.cpp"
 #include "texture.cpp"
 #include "mesh.cpp"
+#include "model.cpp"
 
 #define GLEW_STATIC
 #include <GL\glew.h>
