@@ -18,6 +18,24 @@ LastIndex(char *string, int str_len, char c)
     return index;
 }
 
+void
+ProcessNode(aiNode *node, const aiScene *scene)
+{
+    // TODO(nick): implement
+}
+
+Mesh
+ProcessMesh()
+{
+    // TODO(nick): implement
+}
+
+Texture *
+LoadMaterialTextures()
+{
+    // TODO(nick): implement
+}
+
 Model *
 CreateModel(char *path)
 {
