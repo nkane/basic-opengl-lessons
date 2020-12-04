@@ -4,6 +4,20 @@ typedef struct _model
     char *directory;
 } Model;
 
+int
+LastIndex(char *string, int str_len, char c)
+{
+    int index = -1;
+    for (int i = 0; i < str_len; i++)
+    {
+        if (string[i] == c)
+        {
+            index = i;
+        }
+    }
+    return index;
+}
+
 Model *
 CreateModel(char *path)
 {
@@ -20,20 +34,18 @@ CreateModel(char *path)
         printf("[MODEL ERROR]: failed to create model\n");
         return NULL;
     }
-    return Result;
-}
-
-int
-LastIndex(char *string, char c)
-{
-    int index = -1;
-    int str_len = strlen(string);
-    for (int i = 0; i < str_len; i++)
+    int str_len = strlen(path);
+    int index = LastIndex(path, str_len, '\\');
+    if (index > 0) 
     {
-        if (string[i] == c)
+        int size = sizeof(char) * (str_len - index) + 1;
+        Result->directory = (char *)malloc(size);
+        memset(Result->directory, 0, size);
+        for (int i = index, j = 0; i < str_len; i++, j++)
         {
-            index = i;
+            Result->directory[j] = path[i];
         }
+        printf("[MODLE INFO]: directory -> %s", Result->directory);
     }
-    return index;
+    return Result;
 }
