@@ -22,18 +22,21 @@ void
 ProcessNode(aiNode *node, const aiScene *scene)
 {
     // TODO(nick): implement
+    for (unsigned int i = 0; )
 }
 
 Mesh
 ProcessMesh()
 {
     // TODO(nick): implement
+    return Mesh{};
 }
 
 Texture *
 LoadMaterialTextures()
 {
     // TODO(nick): implement
+    return NULL;
 }
 
 Model *

@@ -44,6 +44,7 @@ main()
     if (glewInit() != GLEW_OK)
     {
         printf("Error: failed to init glew\n");
+        return -1;
     }
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
