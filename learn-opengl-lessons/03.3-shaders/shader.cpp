@@ -64,7 +64,6 @@ CreateShaderProgram(const char *vertex_shader_path, const char *fragment_shader_
     {
         glGetShaderInfoLog(vertex_shader_id, 512, NULL, info_logs);
         printf("[Error - Vertex Shader]: %s\n", info_logs);
-        // TODO(nick): release stuff
         return NULL;
     }
     memset(info_logs, 0, 512);
