@@ -1,6 +1,7 @@
 /*
- * Exercise 1
- * - Make sure only the happy face looks in the other/reverse direction by changing the fragment shader
+ * Exercise 4
+ * - Use a uniform variable as the mix function's third parameter to vary the amount the two textures are visible.
+ *   Use the up and down arrow keys to change how much the container or the smiley face is visible
  */
 
 #include <stdio.h>
@@ -17,6 +18,7 @@
 #include <stb\stb_image.h>
 
 static unsigned int WireFrameEnabled = 0;
+static float u_mix = 0.0f;
 
 void
 framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -35,6 +37,24 @@ process_input(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         WireFrameEnabled = ~WireFrameEnabled;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        u_mix += 0.0005;
+        if (u_mix > 1.00f)
+        {
+            u_mix = 1.00f;
+        }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        u_mix -= 0.0005;
+        if (u_mix < 0.00f)
+        {
+            u_mix = 0.00f;
+        }
     }
 }
 
@@ -176,6 +196,7 @@ main()
             }
 
             glUseProgram(shader_program->id);
+            SetFloatUniform(shader_program, "u_mix", u_mix);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, container_texture_id);

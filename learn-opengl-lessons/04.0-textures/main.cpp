@@ -68,7 +68,7 @@ main()
     int height;
     int channels;
 
-    unsigned char *data = stbi_load("assets/container.jpg", &width, &height, &channels, 0);
+    unsigned char *data = stbi_load("assets/wall.jpg", &width, &height, &channels, 0);
     if (!data)
     {
         printf("[STB_Image ERROR]: failed to load texture");
@@ -78,6 +78,7 @@ main()
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
+
     // set texture wrapping and filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -93,13 +94,12 @@ main()
     glBindVertexArray(vertex_array_id);
 
     // copy vertices array in a vertex buffer
-    float vertices[32] =
+    float vertices[24] =
     {
         // positions            // colors           // texture coords
-         0.5f,  0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,         // top right
-         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,         // bottom right
-        -0.5f, -0.5f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         // bottom left
-        -0.5f,  0.5f,  0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,         // top left
+        -0.5f, -0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   0.0f, 0.0f,          // left
+         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,          // right
+         0.0f,  0.5f,  0.0f,    0.0f, 0.0f, 1.0f,   0.5f, 1.0f,          // top 
     };
     unsigned vertex_buffer_id;
     glGenBuffers(1, &vertex_buffer_id);
@@ -107,10 +107,9 @@ main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // copy index array in an element buffer (index buffer)
-    unsigned int indices[6] =
+    unsigned int indices[3] =
     {
-        0, 1, 3, 
-        1, 2, 3,
+        0, 1, 2, 
     };
     unsigned int index_buffer_id;
     glGenBuffers(1, &index_buffer_id);
@@ -118,10 +117,13 @@ main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // set vertex arrtribute pointers
+    //position 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    // color
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // texture coordinate
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 

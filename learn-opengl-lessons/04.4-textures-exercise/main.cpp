@@ -1,8 +1,6 @@
 /*
- * Exercise 2
- * - Experiment with the different texture wrapping methods by specifying texture coordinates in the range 0.0f to 2.0f
- *   instead of 0.0f to 1.0f. See if you can display 4 smiley faces on a single container image clamped at its edge.
- *   See if you can experiment with other wrapping methods as well. 
+ * Exercise 1
+ * - Make sure only the happy face looks in the other/reverse direction by changing the fragment shader
  */
 
 #include <stdio.h>
@@ -88,8 +86,8 @@ main()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, container_texture_id);
     // set texture wrapping and filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -125,10 +123,10 @@ main()
     float vertices[32] =
     {
         // positions            // colors           // texture coords
-         0.5f,  0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   2.0f, 2.0f,         // top right
-         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   2.0f, 0.0f,         // bottom right
+         0.5f,  0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,         // top right
+         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,         // bottom right
         -0.5f, -0.5f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         // bottom left
-        -0.5f,  0.5f,  0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 2.0f,         // top left
+        -0.5f,  0.5f,  0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,         // top left
     };
     unsigned vertex_buffer_id;
     glGenBuffers(1, &vertex_buffer_id);

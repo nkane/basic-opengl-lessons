@@ -1,8 +1,8 @@
 /*
- * Exercise 3
- * - Try to display only the center pixels of the texture image on the rectangle in such
- *   a way that the individual pixels are getting visible by changing the texture coordinates.
- *   Try to set the texture filtering method to GL_NEAREST to see the pixels more clearly
+ * Exercise 2
+ * - Experiment with the different texture wrapping methods by specifying texture coordinates in the range 0.0f to 2.0f
+ *   instead of 0.0f to 1.0f. See if you can display 4 smiley faces on a single container image clamped at its edge.
+ *   See if you can experiment with other wrapping methods as well. 
  */
 
 #include <stdio.h>
@@ -88,8 +88,8 @@ main()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, container_texture_id);
     // set texture wrapping and filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -109,10 +109,10 @@ main()
     glGenTextures(1, &face_texture_id);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, face_texture_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
@@ -125,10 +125,10 @@ main()
     float vertices[32] =
     {
         // positions            // colors           // texture coords
-         0.5f,  0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   0.55f, 0.55f,         // top right
-         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   0.55f, 0.45f,         // bottom right
-        -0.5f, -0.5f,  0.0f,    0.0f, 0.0f, 1.0f,   0.45f, 0.45f,         // bottom left
-        -0.5f,  0.5f,  0.0f,    1.0f, 1.0f, 1.0f,   0.45f, 0.55f,         // top left
+         0.5f,  0.5f,  0.0f,    1.0f, 0.0f, 0.0f,   2.0f, 2.0f,         // top right
+         0.5f, -0.5f,  0.0f,    0.0f, 1.0f, 0.0f,   2.0f, 0.0f,         // bottom right
+        -0.5f, -0.5f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         // bottom left
+        -0.5f,  0.5f,  0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 2.0f,         // top left
     };
     unsigned vertex_buffer_id;
     glGenBuffers(1, &vertex_buffer_id);

@@ -71,15 +71,13 @@ main()
     unsigned char *data = stbi_load("assets/container.jpg", &width, &height, &channels, 0);
     if (!data)
     {
-        printf("[STB_Image ERROR]: failed to load image\n");
+        printf("[STB_Image ERROR]: failed to load texture");
         return -1;
     }
     // generate and bind texture
-    unsigned int container_texture_id;
-    glGenTextures(1, &container_texture_id);
-    // activate the texture unit first before binding texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, container_texture_id);
+    unsigned int texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     // set texture wrapping and filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -88,27 +86,7 @@ main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
-    data = NULL;
-    width = 0;
-    height = 0;
-    stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("assets/awesomeface.png", &width, &height, &channels, 0);
-    if (!data)
-    {
-        printf("[STB_Image ERROR]: failed to load image\n");
-        return -1;
-    }
-    unsigned int face_texture_id;
-    glGenTextures(1, &face_texture_id);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, face_texture_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
+
     // bind vertex array
     unsigned int vertex_array_id;
     glGenVertexArrays(1, &vertex_array_id);
@@ -148,9 +126,6 @@ main()
     glEnableVertexAttribArray(2);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
-    glUseProgram(shader_program->id);
-    SetIntUniform(shader_program, "u_texture_1", 0);
-    SetIntUniform(shader_program, "u_texture_2", 1);
 
     glBindVertexArray(0);
 
@@ -169,15 +144,7 @@ main()
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
-
             glUseProgram(shader_program->id);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, container_texture_id);
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, face_texture_id);
-
             glBindVertexArray(vertex_array_id);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
