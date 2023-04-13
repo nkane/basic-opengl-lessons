@@ -2,5 +2,6 @@
     "files.associations": {
         "cmath": "cpp",
         "xstring": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/libs/include/glm"
 }

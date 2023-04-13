@@ -1,9 +1,7 @@
 /*
- * Exercise 2:
- * - Try drawing a second container with another call to glDrawElements but place it at a different
- *   position using transformations only. Make sure this second container is placed at the top-left
- *   of the window and instead of rotating, scale it over time (using the sin function is useful
- *   here; note that using sin will cause the object to invert as soon as a negative scale is applied)
+ * Exercise 1
+ * - Using the last transformation on the container, try switching the order around
+ *   by first rotating and then translating. See what happens and try to reason why this happens
  */
 
 #include <stdio.h>
@@ -167,6 +165,11 @@ main()
 
     while (!glfwWindowShouldClose(window))
     {
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        SetFloatMat4Uniform(shader_program, "u_transform", glm::value_ptr(transform));
+
         process_input(window);
         {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -190,17 +193,6 @@ main()
             glBindTexture(GL_TEXTURE_2D, face_texture_id);
 
             glBindVertexArray(vertex_array_id);
-
-            glm::mat4 transform = glm::mat4(1.0f);
-            transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-            transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-            SetFloatMat4Uniform(shader_program, "u_transform", glm::value_ptr(transform));
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            transform = glm::mat4(1.0f);
-            transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-            transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-            SetFloatMat4Uniform(shader_program, "u_transform", glm::value_ptr(transform));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
         glfwPollEvents();
