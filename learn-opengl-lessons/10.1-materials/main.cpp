@@ -199,14 +199,24 @@ main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
+    glm::vec3 light_color;
+    light_color.x = sin(glfwGetTime() * 2.0f);
+    light_color.y = sin(glfwGetTime() * 0.7f);
+    light_color.z = sin(glfwGetTime() * 1.3f);
+
+    glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
+    glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
+
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
     glUseProgram(shader_program->id);
     SetFloatVec3Uniform(shader_program, "u_material.ambient_light", glm::vec3(1.0f, 0.5f, 0.31f));
     SetFloatVec3Uniform(shader_program, "u_material.diffuse_light", glm::vec3(1.0f, 0.5f, 0.31f));
     SetFloatVec3Uniform(shader_program, "u_material.specular_highlight", glm::vec3(0.5f, 0.5f, 0.5f));
     SetFloatUniform(shader_program, "u_material.shininess", 32.0f);
-    SetFloatVec3Uniform(shader_program, "u_light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    SetFloatVec3Uniform(shader_program, "u_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    SetFloatVec3Uniform(shader_program, "u_light.ambient", ambient_color);
+    SetFloatVec3Uniform(shader_program, "u_light.diffuse", diffuse_color);
+    //SetFloatVec3Uniform(shader_program, "u_light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    //SetFloatVec3Uniform(shader_program, "u_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
     SetFloatVec3Uniform(shader_program, "u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     ShaderProgram *light_shader_program = CreateShaderProgram("shaders/vertex_light_source.glsl", "shaders/fragment_light_source.glsl");
@@ -268,6 +278,16 @@ main()
             SetFloatMat4Uniform(shader_program, "u_projection", glm::value_ptr(perspective_projection));
             SetFloatVec3Uniform(shader_program, "u_view_position", camera->position);
             SetFloatVec3Uniform(shader_program, "u_light.position", light_position);
+
+            light_color.x = sin(glfwGetTime() * 2.0f);
+            light_color.y = sin(glfwGetTime() * 0.7f);
+            light_color.z = sin(glfwGetTime() * 1.3f);
+            glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
+            glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
+
+            SetFloatVec3Uniform(shader_program, "u_light.ambient", ambient_color);
+            SetFloatVec3Uniform(shader_program, "u_light.diffuse", diffuse_color);
+
             glDrawArrays(GL_TRIANGLES, 0, 36);
             float current_frame = glfwGetTime();
             delta_time = current_frame - last_frame;

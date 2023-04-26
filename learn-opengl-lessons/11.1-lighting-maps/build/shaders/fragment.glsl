@@ -32,13 +32,13 @@ void main()
 
     // diffuse
     vec3 norm = normalize(v_normal);
-    vec3 light_directoin = normalize(u_light.position - v_fragment_position);
-    float diff = max(dot(norm, light_directoin), 0.0);
+    vec3 light_direction = normalize(u_light.position - v_fragment_position);
+    float diff = max(dot(norm, light_direction), 0.0);
     vec3 diffuse = u_light.diffuse * diff * vec3(texture(u_material.diffuse, v_texture_coordinates));
 
     // specular
     vec3 view_direction = normalize(u_view_position - v_fragment_position);
-    vec3 reflection_direction = reflect(-light_directoin, norm);
+    vec3 reflection_direction = reflect(-light_direction, norm);
     float spec = pow(max(dot(view_direction, reflection_direction), 0.0), u_material.shininess);
     vec3 specular = u_light.specular * spec * vec3(texture(u_material.specular, v_texture_coordinates));
 
