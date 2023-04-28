@@ -53,6 +53,11 @@ ProcessNode(Model *model, aiNode *node, const aiScene *scene)
         Mesh *internal_mesh = ProcessMesh(mesh, scene);
         PushModelMesh(model, internal_mesh);
     }
+    // after processing all of the meshes, recursively process each of the children nodes
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        ProcessNode(model, node->mChildren[i], scene);
+    }
 }
 
 Texture *
