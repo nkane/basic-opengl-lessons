@@ -1,6 +1,8 @@
 typedef struct _model
 {
-    Mesh *Meshes;
+    Mesh *meshes;
+    int mesh_length;
+    int mesh_capacity;
     char *directory;
 } Model;
 
@@ -19,17 +21,38 @@ LastIndex(char *string, int str_len, char c)
 }
 
 void
-ProcessNode(aiNode *node, const aiScene *scene)
+PushModelMesh(Model *model, Mesh *internal_mesh)
 {
-    // TODO(nick): implement
-    for (unsigned int i = 0; )
+    if (model->mesh_length >= model->mesh_capacity)
+    {
+        int real_capacity = (sizeof(Mesh) * model->mesh_capacity + 1);
+        model->meshes = (Mesh *)realloc(model->meshes, real_capacity);
+        model->mesh_capacity++;
+    }
+    //model->meshes[model->mesh_length] = NULL;
+    model->mesh_length++;
 }
 
-Mesh
-ProcessMesh()
+Mesh *
+ProcessMesh(aiMesh *mesh, const aiScene *scene)
 {
     // TODO(nick): implement
-    return Mesh{};
+    return NULL;
+}
+
+void
+ProcessNode(Model *model, aiNode *node, const aiScene *scene)
+{
+    // TODO(nick): implement
+    // process each mesh located at the current node
+    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    {
+        // node object only contains indices to index the actual objects in the scene
+        // scene contains all the data, node is just to keep stuff organized like relations between nodes
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        Mesh *internal_mesh = ProcessMesh(mesh, scene);
+        PushModelMesh(model, internal_mesh);
+    }
 }
 
 Texture *
@@ -68,5 +91,10 @@ CreateModel(char *path)
         }
         printf("[MODLE INFO]: directory -> %s", Result->directory);
     }
+    // allocate 10 mesh slots up front
+    Result->meshes = (Mesh *)malloc(sizeof(Mesh) * 10);
+    Result->mesh_length = 0;
+    Result->mesh_capacity = 10;
+    ProcessNode(Result, scene->mRootNode, scene);
     return Result;
 }

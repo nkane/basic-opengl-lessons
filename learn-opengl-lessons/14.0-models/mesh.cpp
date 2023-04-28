@@ -95,7 +95,7 @@ DrawMesh(Mesh *m, ShaderProgram *shader_program)
             number = specular_number++;
         }
         sprintf(buffer, "%s_%d", buffer, number);
-        SetFloatUniform(shader_program, (const char *)buffer, i);
+        SetIntUniform(shader_program, (const char *)buffer, i);
         glBindTexture(GL_TEXTURE_2D, m->textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
