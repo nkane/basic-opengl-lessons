@@ -16,6 +16,7 @@ typedef struct _mesh_texture
 {
     unsigned int id;
     char *type;
+    char *path;
 } MeshTexture;
 
 typedef struct _mesh 

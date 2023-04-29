@@ -1,4 +1,5 @@
-
+// TODO(nick):
+// source: https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/model.h
 
 typedef struct _model
 {
@@ -23,13 +24,20 @@ LastIndex(char *string, int str_len, char c)
 }
 
 // TODO(nick): implement
+MeshTexture *
+LoadMaterialTextures(aiMaterial *material, aiTextureType type, char *type_name)
+{
+    return NULL;
+}
+
+// TODO(nick): implement
 Mesh *
 ProcessMesh(aiMesh *mesh, const aiScene *scene)
 {
     Mesh *result = (Mesh *)malloc(sizeof(Mesh));
     Vertex *vertices = NULL;
-    //unsigned int *indices;
-    //MeshTexture *textures;
+    unsigned int *indices = NULL;
+    MeshTexture *textures = NULL;
     // walk through each of the mesh's vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
@@ -64,16 +72,24 @@ ProcessMesh(aiMesh *mesh, const aiScene *scene)
                 vector.x = mesh->mTangents[i].x;
                 vector.y = mesh->mTangents[i].y;
                 vector.z = mesh->mTangents[i].z;
-                vertex.tangent = vector;
             }
+            else 
+            {
+                vector = glm::vec3(0.0f);
+            }
+            vertex.tangent = vector;
             // bitangent
             if (mesh->mBitangents)
             {
                 vector.x = mesh->mBitangents[i].x;
-                vector.y = mesh->mBitangents[i].x;
-                vector.z = mesh->mBitangents[i].x;
-                vertex.bitangent = vector;
+                vector.y = mesh->mBitangents[i].y;
+                vector.z = mesh->mBitangents[i].z;
             }
+            else
+            {
+                vector = glm::vec3(0.0f);
+            }
+            vertex.bitangent = vector;
         }
         else
         {
@@ -81,8 +97,39 @@ ProcessMesh(aiMesh *mesh, const aiScene *scene)
         }
         arrput(vertices, vertex);
     }
+    // walk through each of the mesh's faces, a face is a mesh and triangles,
+    // and retrieve the corresponding vertex indices
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
+        aiFace face = mesh->mFaces[i];
+        // retrieve all indices of the face and store in the indice list
+        for (unsigned int j = 0; j < face.mNumIndices; j++)
+        {
+            arrput(indices, face.mIndices[j]);
+        }
+    }
+    // process materials
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+    // assume a convention for sampler names in shaders
+    // each diffuse texture should be named as 'texture_diffuseN'
+    // where N is the sequential number ranging from 1 to MAX_SAMPLER_NUMBER
+    // same applies to other textures as following:
+    // diffuse: texture_diffuse
+    // specular: texture_specularN
+    // normal: texture_normalN
 
-    // TODO(nick): finish the rest
+    // 1. diffuse maps
+    MeshTexture *diffuse_maps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    for (unsigned int i = 0; i < arrlenu(diffuse_maps); i++)
+    {
+        arrput(textures, diffuse_maps[i]);
+    }
+    // 2. specular maps
+
+    // TODO(nick): set results
+    result->vertices = vertices;
+    result->indices = indices;
+
     return result;
 }
 
@@ -108,12 +155,6 @@ ProcessNode(Model *model, aiNode *node, const aiScene *scene)
     }
 }
 
-Texture *
-LoadMaterialTextures()
-{
-    // TODO(nick): implement
-    return NULL;
-}
 
 Model *
 CreateModel(char *path)
