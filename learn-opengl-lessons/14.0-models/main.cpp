@@ -2,7 +2,6 @@
  *  models
  */
 
-
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -18,11 +17,14 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
+#define STB_DS_IMPLEMENTATION
+#include <stb\stb_ds.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "dlist.cpp"
 #include "shader.cpp"
 #include "camera.cpp"
 #include "material.cpp"
