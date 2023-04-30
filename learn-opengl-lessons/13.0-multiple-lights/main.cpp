@@ -7,11 +7,6 @@
 #include <memory.h>
 #include <math.h>
 
-#include "shader.cpp"
-#include "camera.cpp"
-#include "material.cpp"
-#include "texture.cpp"
-
 #define GLEW_STATIC
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
@@ -22,6 +17,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "shader.cpp"
+#include "camera.cpp"
+#include "material.cpp"
+#include "texture.cpp"
 
 static unsigned int WireFrameEnabled = 0;
 static unsigned int width = 800;

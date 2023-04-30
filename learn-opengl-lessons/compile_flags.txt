@@ -1,0 +1,4 @@
+-L./libs/glfw/lib-vc2019/glfw3.lib
+-L./libs/glew/glew32s.lib
+-I./libs/include/
+-lfmt

@@ -2,13 +2,6 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#define GLEW_STATIC
-#include <GL\glew.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 typedef struct _shader_program
 {
     unsigned int id;
