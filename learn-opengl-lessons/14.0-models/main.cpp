@@ -2,6 +2,7 @@
  *  models
  */
 
+#include "glm/ext/matrix_clip_space.hpp"
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -11,26 +12,41 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#ifndef GLEW_STATIC
 #define GLEW_STATIC
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
+#endif
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
 #define STB_DS_IMPLEMENTATION
 #include <stb\stb_ds.h>
 
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "dlist.cpp"
+#ifndef INTERNAL_SHADER
+#define INTERNAL_SHADER
 #include "shader.cpp"
+#endif
+
+#ifndef INTERNAL_VERTEX
+#define INTERNAL_VERTEX
+#include "vertex.cpp"
+#endif
+
 #include "camera.cpp"
 #include "material.cpp"
 #include "texture.cpp"
-#include "mesh.cpp"
+
+#ifndef INTERNAL_MODEL
+#define INTERNAL_MODEL
 #include "model.cpp"
+#endif
+
 
 static unsigned int WireFrameEnabled = 0;
 static unsigned int width = 800;
@@ -156,6 +172,7 @@ main()
     Model *model = CreateModel("./assets/backpack.obj");
 
     // TODO(nick): load shaders
+    ShaderProgram *model_shader = CreateShaderProgram("./shaders/model_vertex.glsl", "./shaders/model_fragment.glsl");
 
     // create camera
     camera = CreateCamera(camera_position, camera_up, 90.0f, 0.0f);
@@ -167,8 +184,22 @@ main()
         last_frame = current_frame;
 
         process_input(window);
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(model_shader->id);
+
+        glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 view = CustomGetViewMatrix(camera);
+        SetFloatMat4Uniform(model_shader, "projection", glm::value_ptr(projection));
+        SetFloatMat4Uniform(model_shader, "view", glm::value_ptr(view));
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        SetFloatMat4Uniform(model_shader, "model", glm::value_ptr(model));
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
