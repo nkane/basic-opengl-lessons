@@ -1,8 +1,6 @@
 /*
  *  Multiple Lights
  */
-
-
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -22,6 +20,9 @@
 #include "camera.cpp"
 #include "material.cpp"
 #include "texture.cpp"
+
+#include "mesh.cpp"
+//#include "model.cpp"
 
 static unsigned int WireFrameEnabled = 0;
 static unsigned int width = 800;
