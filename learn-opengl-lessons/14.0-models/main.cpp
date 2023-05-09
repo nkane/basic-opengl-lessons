@@ -415,10 +415,6 @@ main()
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
 
-            float current_frame = glfwGetTime();
-            delta_time = current_frame - last_frame;
-            last_frame = current_frame;
-
             // render lamps
             glUseProgram(light_shader_program->id);
             glBindVertexArray(vertex_array_light_id);
@@ -432,6 +428,18 @@ main()
                 SetFloatMat4Uniform(light_shader_program, "u_model", glm::value_ptr(model));
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
+
+            glUseProgram(model_shader_program->id);
+            SetFloatMat4Uniform(model_shader_program, "view", glm::value_ptr(view));
+            SetFloatMat4Uniform(model_shader_program, "projection", glm::value_ptr(perspective_projection));
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+            SetFloatMat4Uniform(model_shader_program, "model", glm::value_ptr(model));
+            DrawModel(model_obj, model_shader_program);
+
+            float current_frame = glfwGetTime();
+            delta_time = current_frame - last_frame;
+            last_frame = current_frame;
         }
         glfwPollEvents();
         glfwSwapBuffers(window);
