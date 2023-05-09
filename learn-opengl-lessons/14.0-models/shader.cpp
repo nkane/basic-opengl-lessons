@@ -1,3 +1,17 @@
+#ifndef _INTERNAL_SHADER
+#define _INTERNAL_SHADER
+
+#ifndef GLEW_STATIC
+#define GLEW_STATIC
+#include <GL\glew.h>
+#include <GLFW\glfw3.h>
+#endif
+
+#ifndef GLM_DEFINED
+#include <glm/glm.hpp>
+#define GLM_DEFINED
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -162,3 +176,4 @@ ReleaseShaderProgram(ShaderProgram *shader_program)
         free(shader_program);
     }
 }
+#endif

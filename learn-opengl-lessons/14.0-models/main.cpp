@@ -1,6 +1,9 @@
 /*
  *  Multiple Lights
  */
+
+
+#include <cstddef>
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -12,6 +15,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
 
+#define GLM_DEFINED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -21,8 +25,9 @@
 #include "material.cpp"
 #include "texture.cpp"
 
+#include "vertex.cpp"
 #include "mesh.cpp"
-//#include "model.cpp"
+#include "model.cpp"
 
 static unsigned int WireFrameEnabled = 0;
 static unsigned int width = 800;
@@ -274,15 +279,27 @@ main()
     glEnableVertexAttribArray(0);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
-    if (!shader_program)
+    if (!shader_program == NULL)
     {
         printf("[SHADER ERROR]: failed to load base shader\n");
     }
 
     ShaderProgram *light_shader_program = CreateShaderProgram("shaders/vertex_light_source.glsl", "shaders/fragment_light_source.glsl");
-    if (!light_shader_program)
+    if (light_shader_program == NULL)
     {
         printf("[SHADER ERROR]: failed to load light shader\n");
+    }
+
+    ShaderProgram *model_shader_program = CreateShaderProgram("shaders/model_vertex.glsl", "shaders/model_fragment.glsl");
+    if (model_shader_program == NULL)
+    {
+        printf("[SHADER ERROR]: failed to model shader\n");
+    }
+
+    Model *model_obj = CreateModel("assets/rock.obj");
+    if (model_obj == NULL)
+    {
+        printf("[MODEL ERROR]: failed to load model\n");
     }
 
     glBindVertexArray(0);
