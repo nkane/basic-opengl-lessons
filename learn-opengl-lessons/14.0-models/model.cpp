@@ -72,6 +72,7 @@ MeshTexture *
 LoadMaterialTextures(Model *model, aiMaterial *material, aiTextureType type, const char *type_name)
 {
     MeshTexture *result = NULL;
+    printf("material texture count: %u\n", material->GetTextureCount(type));
     for (unsigned int i = 0; i < material->GetTextureCount(type); i++)
     {
         aiString str;
@@ -81,7 +82,8 @@ LoadMaterialTextures(Model *model, aiMaterial *material, aiTextureType type, con
         printf("checking %s\n", str.C_Str());
         if (model->loaded_textures != NULL) 
         {
-            for (unsigned int j = 0; j < arrlen(model->loaded_textures); j++)
+            printf("checking cache of length %lld\n", arrlenu(model->loaded_textures));
+            for (unsigned int j = 0; j < arrlenu(model->loaded_textures); j++)
             {
                 if (strcmp(model->loaded_textures[j].path, str.C_Str()) == 0)
                 {
@@ -112,6 +114,7 @@ Mesh *
 ProcessMesh(Model *model, aiMesh *mesh, const aiScene *scene)
 {
     Mesh *result = (Mesh *)malloc(sizeof(Mesh));
+    memset(result, 0, sizeof(Mesh));
     Vertex *vertices = NULL;
     unsigned int *indices = NULL;
     MeshTexture *textures = NULL;
@@ -198,27 +201,40 @@ ProcessMesh(Model *model, aiMesh *mesh, const aiScene *scene)
 
     // 1. diffuse maps
     MeshTexture *diffuse_maps = LoadMaterialTextures(model, material, aiTextureType_DIFFUSE, "texture_diffuse");
-    for (unsigned int i = 0; i < arrlenu(diffuse_maps); i++)
+    if (diffuse_maps != NULL)
     {
-        arrput(textures, diffuse_maps[i]);
+        for (unsigned int i = 0; i < arrlenu(diffuse_maps); i++)
+        {
+            arrput(textures, diffuse_maps[i]);
+        }
     }
     // 2. specular maps
     MeshTexture *specular_maps = LoadMaterialTextures(model, material, aiTextureType_SPECULAR, "texture_specular");
-    for (unsigned int i = 0; i < arrlenu(specular_maps); i++)
+    if (specular_maps != NULL)
     {
-        arrput(textures, specular_maps[i]);
+        for (unsigned int i = 0; i < arrlenu(specular_maps); i++)
+        {
+            arrput(textures, specular_maps[i]);
+        }
     }
     // 3. normal maps
     MeshTexture *normal_maps = LoadMaterialTextures(model, material, aiTextureType_HEIGHT, "texture_normal");
-    for (unsigned int i = 0; i < arrlenu(normal_maps); i++)
+    if (normal_maps != NULL)
     {
-        arrput(textures, normal_maps[i]);
+        for (unsigned int i = 0; i < arrlenu(normal_maps); i++)
+        {
+            arrput(textures, normal_maps[i]);
+        }
     }
+
     // 4. height maps
     MeshTexture *height_maps= LoadMaterialTextures(model, material, aiTextureType_AMBIENT, "texture_height");
-    for (unsigned int i = 0; i < arrlenu(height_maps); i++)
+    if (height_maps != NULL)
     {
-        arrput(textures, height_maps[i]);
+        for (unsigned int i = 0; i < arrlenu(height_maps); i++)
+        {
+            arrput(textures, height_maps[i]);
+        }
     }
 
     result->vertices = vertices;
@@ -259,14 +275,15 @@ CreateModel(const char *path)
         printf("[MODEL ERROR]: %s\n", import.GetErrorString());
         return NULL;
     }
-    Model *Result = (Model * )malloc(sizeof(Model));
-    if (Result == NULL)
+    Model *model = (Model * )malloc(sizeof(Model));
+    memset(model, 0, sizeof(Model));
+    if (model == NULL)
     {
         printf("[MODEL ERROR]: failed to create model\n");
         return NULL;
     }
-    ProcessNode(Result, scene->mRootNode, scene);
-    return Result;
+    ProcessNode(model, scene->mRootNode, scene);
+    return model;
 }
 
 void

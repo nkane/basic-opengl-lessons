@@ -279,7 +279,7 @@ main()
     glEnableVertexAttribArray(0);
 
     ShaderProgram *shader_program = CreateShaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");   
-    if (!shader_program == NULL)
+    if (shader_program == NULL)
     {
         printf("[SHADER ERROR]: failed to load base shader\n");
     }
@@ -448,6 +448,7 @@ main()
     {
         ReleaseShaderProgram(shader_program);
         ReleaseShaderProgram(light_shader_program);
+        ReleaseShaderProgram(model_shader_program);
         glDeleteVertexArrays(1, &vertex_array_id);
         glDeleteBuffers(1, &vertex_buffer_id);
         glfwTerminate();
