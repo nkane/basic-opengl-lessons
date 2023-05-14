@@ -127,7 +127,9 @@ SetBoolUniform(ShaderProgram *shader_program, const char *name, bool value)
 void
 SetIntUniform(ShaderProgram *shader_program, const char *name, int value)
 {
+    //printf("shader program %d, attempting to get int uniform %s\n", shader_program->id, name);
     int uniform_id = glGetUniformLocation(shader_program->id, name);
+    //printf("shader program %d, int uniform id %d\n",shader_program->id, uniform_id);
     glUniform1i(uniform_id, value);
 }
 

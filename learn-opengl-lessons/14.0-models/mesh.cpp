@@ -23,8 +23,8 @@
 typedef struct _mesh_texture 
 {
     unsigned int id;
-    const char *type;
-    const char *path;
+    char *type;
+    char *path;
 } MeshTexture;
 
 typedef struct _mesh 
@@ -111,7 +111,7 @@ DrawMesh(Mesh *m, ShaderProgram *shader_program)
         glActiveTexture(GL_TEXTURE0 + i);
         memset(buffer, 0, 1024);
         const char *name = m->textures[i].type;
-        strcat(buffer, name);
+        strcat_s(buffer, name);
         if (strcmp(name, "texture_diffuse") == 0)
         {
             number = diffuse_number++;
@@ -129,7 +129,7 @@ DrawMesh(Mesh *m, ShaderProgram *shader_program)
             number = height_number++;
         }
         sprintf(buffer, "%s_%d", buffer, number);
-        SetIntUniform(shader_program, (const char *)buffer, i);
+        SetIntUniform(shader_program, buffer, i);
         glBindTexture(GL_TEXTURE_2D, m->textures[i].id);
     }
     glBindVertexArray(m->vertex_array_id);

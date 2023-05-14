@@ -288,7 +288,7 @@ main()
     if (light_shader_program == NULL)
     {
         printf("[SHADER ERROR]: failed to load light shader\n");
-    }
+    } 
 
     ShaderProgram *model_shader_program = CreateShaderProgram("shaders/model_vertex.glsl", "shaders/model_fragment.glsl");
     if (model_shader_program == NULL)

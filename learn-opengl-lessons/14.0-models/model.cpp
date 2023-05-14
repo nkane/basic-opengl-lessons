@@ -9,7 +9,7 @@
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
-#endif
+#endif  
 
 #include <assimp/material.h>
 #include <assimp/Importer.hpp>
@@ -19,6 +19,8 @@
 #include "shader.cpp"
 #include "vertex.cpp"
 #include "mesh.cpp"
+
+#include <string.h>
 
 typedef struct _model
 {
@@ -69,7 +71,7 @@ TextureFromFile(const char *file)
 }
 
 MeshTexture *
-LoadMaterialTextures(Model *model, aiMaterial *material, aiTextureType type, const char *type_name)
+LoadMaterialTextures(Model *model, aiMaterial *material, aiTextureType type, char *type_name)
 {
     MeshTexture *result = NULL;
     printf("material texture count: %u\n", material->GetTextureCount(type));
@@ -102,7 +104,9 @@ LoadMaterialTextures(Model *model, aiMaterial *material, aiTextureType type, con
             sprintf(buffer, "./assets/%s", str.C_Str());
             texture.id = TextureFromFile(buffer);
             texture.type = type_name;
-            texture.path = str.C_Str();
+            // NOTE(nick): need to make a copy
+            texture.path = (char *)malloc(strlen(str.C_Str()) * sizeof(char));
+            strcpy(texture.path, str.C_Str());
             arrput(result, texture);
             arrput(model->loaded_textures, texture);
         }

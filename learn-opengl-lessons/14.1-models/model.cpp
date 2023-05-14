@@ -9,7 +9,7 @@
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
-#endif
+#endif  
 
 #include <assimp/material.h>
 #include <assimp/Importer.hpp>
@@ -31,7 +31,6 @@ typedef struct _model
 unsigned int 
 TextureFromFile(const char *file)
 {
-    // TODO(nick): this is failing to load the texture
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
     int width, height, nr_components;
