@@ -1,5 +1,5 @@
 /*
- *  Multiple Lights
+ *  model loading
  */
 
 
