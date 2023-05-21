@@ -117,7 +117,7 @@ SetBoolUniform(ShaderProgram *s, const char *name, bool v)
 }
 
 void
-SetInfUniform(ShaderProgram *s, const char *name, int v)
+SetIntUniform(ShaderProgram *s, const char *name, int v)
 {
     int id = glGetUniformLocation(s->id, name);
     glUniform1i(id, v);
