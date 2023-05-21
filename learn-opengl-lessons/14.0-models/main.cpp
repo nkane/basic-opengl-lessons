@@ -2,7 +2,6 @@
  *  model loading
  */
 
-
 #include <cstddef>
 #include <stdio.h>
 #include <memory.h>
@@ -141,8 +140,7 @@ main()
     }
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    glViewport(0, 0, width, height);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glViewport(0, 0, width, height); glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     Texture container_texture = {};
     stbi_set_flip_vertically_on_load(true);
