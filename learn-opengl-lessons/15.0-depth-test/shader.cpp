@@ -8,8 +8,8 @@
 #endif
 
 #ifndef GLM_DEFINED
-#define GLM_DEFINED
 #include <glm/glm.hpp>
+#define GLM_DEFINED
 #endif
 
 #include <stdio.h>
@@ -26,146 +26,156 @@ typedef struct _shader_program
 ShaderProgram *
 CreateShaderProgram(const char *vertex_shader_path, const char *fragment_shader_path)
 {
-    FILE *vertex_shader_file = fopen(vertex_shader_path, "r");
-    if (!vertex_shader_path)
+    ShaderProgram *Result = (ShaderProgram *)malloc(sizeof(ShaderProgram));
+    if (!Result)
     {
         return NULL;
     }
+
+    FILE *vertex_shader_file = fopen(vertex_shader_path, "r");
+    if (!vertex_shader_path)
+    {
+        free(Result);
+        return NULL;
+    }
+    unsigned int file_length = 0;
+    fseek(vertex_shader_file, 0L, SEEK_END);
+    file_length = ftell(vertex_shader_file);
+    fseek(vertex_shader_file, 0L, SEEK_SET);
+    Result->vertex_file_buffer = (char *)malloc(file_length * sizeof(char) + 1);
+    memset(Result->vertex_file_buffer, 0, file_length + 1);
+    fread(Result->vertex_file_buffer, sizeof(char), file_length, vertex_shader_file);
+    file_length = 0;
 
     FILE *fragment_shader_file = fopen(fragment_shader_path, "r");
     if (!fragment_shader_file)
     {
         fclose(vertex_shader_file);
+        free(Result->vertex_file_buffer);
+        free(Result);
         return NULL;
     }
-
-    ShaderProgram *shader = (ShaderProgram *)malloc(sizeof(ShaderProgram));
-    if (!shader)
-    {
-        fclose(vertex_shader_file);
-        fclose(fragment_shader_file);
-        return NULL;
-    }
-    unsigned int file_length;
-    fseek(vertex_shader_file, 0L, SEEK_END);
-    file_length = ftell(vertex_shader_file);
-    fseek(vertex_shader_file, 0L, SEEK_SET);
-    unsigned int buffer_size = (file_length + 1) * sizeof(char);
-    shader->vertex_file_buffer = (char *)malloc(buffer_size);
-    memset(shader->vertex_file_buffer, 0, buffer_size);
-    fread(shader->vertex_file_buffer, sizeof(char), file_length, vertex_shader_file);
-    fclose(vertex_shader_file);
-
-    file_length = 0;
     fseek(fragment_shader_file, 0L, SEEK_END);
     file_length = ftell(fragment_shader_file);
     fseek(fragment_shader_file, 0L, SEEK_SET);
-    buffer_size = 0;
-    buffer_size = (file_length + 1) * sizeof(char);
-    shader->fragment_file_buffer = (char *)malloc(buffer_size);
-    memset(shader->fragment_file_buffer, 0, buffer_size);
-    fread(shader->fragment_file_buffer, sizeof(char), file_length, fragment_shader_file);
+    Result->fragment_file_buffer = (char *)malloc(file_length * sizeof(char) + 1);
+    memset(Result->fragment_file_buffer, 0, file_length + 1);
+    fread(Result->fragment_file_buffer, sizeof(char), file_length, fragment_shader_file);
+
+    fclose(vertex_shader_file);
     fclose(fragment_shader_file);
 
     unsigned int vertex_shader_id;
     vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader_id, 1, &shader->vertex_file_buffer, NULL);
+    glShaderSource(vertex_shader_id, 1, &Result->vertex_file_buffer, NULL);
     glCompileShader(vertex_shader_id);
-    int status_code;
-    char info_log_buffer[512];
-    unsigned int info_log_buffer_size = sizeof(info_log_buffer) / sizeof(char);
-    memset(info_log_buffer, 0, info_log_buffer_size);
-    glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &status_code);
-    if (!status_code) 
+    int success;
+    char info_logs[512];
+    glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        glGetShaderInfoLog(vertex_shader_id, info_log_buffer_size, NULL, info_log_buffer);
-        printf("[Error - Shader]: failed to compile vertex shader (%s), logs: %s\n", vertex_shader_path, info_log_buffer); 
-        free(shader->vertex_file_buffer);
-        free(shader->fragment_file_buffer);
-        free(shader);
+        glGetShaderInfoLog(vertex_shader_id, 512, NULL, info_logs);
+        printf("[Error - Vertex Shader]: %s\n", info_logs);
+        free(Result->vertex_file_buffer);
+        free(Result->fragment_file_buffer);
+        // TODO(nick): release stuff
         return NULL;
     }
+    memset(info_logs, 0, 512);
 
     unsigned int fragment_shader_id;
-    fragment_shader_id = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(fragment_shader_id, 1, &shader->vertex_file_buffer, NULL);
+    fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader_id, 1, &Result->fragment_file_buffer, NULL);
     glCompileShader(fragment_shader_id);
-    status_code = 0;
-    memset(info_log_buffer, 0, info_log_buffer_size);
-    glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &status_code);
-    if (!status_code) 
+    glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        glGetShaderInfoLog(fragment_shader_id, info_log_buffer_size, NULL, info_log_buffer);
-        printf("[Error - Shader]: failed to compile fragment shader (%s), logs: %s\n", vertex_shader_path, info_log_buffer); 
-        free(shader->vertex_file_buffer);
-        free(shader->fragment_file_buffer);
-        free(shader);
+        glGetShaderInfoLog(fragment_shader_id, 512, NULL, info_logs);
+        printf("[Error - Fragment Shader]: %s\n", info_logs);
+        // TODO(nick): release stuff
         return NULL;
     }
+    memset(info_logs, 0, 512);
 
+    // create shader program linking vertex and fragment shader
+    Result->id = glCreateProgram();
+    glAttachShader(Result->id, vertex_shader_id);
+    glAttachShader(Result->id, fragment_shader_id);
+    glLinkProgram(Result->id);
+    glGetProgramiv(Result->id, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(Result->id, 512, NULL, info_logs);
+        printf("[Error - Program Linking]: %s\n", info_logs);
+    }
+    memset(info_logs, 0, 512);
+
+    // shaders no longer needed, since linked to program
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    return shader;
+    return Result;
 }
 
 void
-SetBoolUniform(ShaderProgram *s, const char *name, bool v)
+SetBoolUniform(ShaderProgram *shader_program, const char *name, bool value)
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniform1i(id, (int)v);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    glUniform1i(uniform_id, (int)value);
 }
 
 void
-SetIntUniform(ShaderProgram *s, const char *name, int v)
+SetIntUniform(ShaderProgram *shader_program, const char *name, int value)
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniform1i(id, v);
+    //printf("shader program %d, attempting to get int uniform %s\n", shader_program->id, name);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    //printf("shader program %d, int uniform id %d\n",shader_program->id, uniform_id);
+    glUniform1i(uniform_id, value);
 }
 
 void
-SetFloatUniform(ShaderProgram *s, const char *name, float v)
+SetFloatUniform(ShaderProgram *shader_program, const char *name, float value)
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniform1f(id, v);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    glUniform1f(uniform_id, value);
 }
 
 void
-SetFloatVec3Uniform(ShaderProgram *s, const char *name, glm::vec3 v)
+SetFloatVec3Uniform(ShaderProgram *shader_program, const char *name, glm::vec3 value)
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniform3f(id, v.x, v.y, v.z);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    glUniform3f(uniform_id, value.x, value.y, value.z);
 }
 
 void
-SetFloat4Uniform(ShaderProgram *s, const char *name, float v[4])
+SetFloat4Uniform(ShaderProgram *shader_program, const char *name, float value[4])
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniform4f(id, v[0], v[1], v[2], v[3]);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    glUniform4f(uniform_id, value[0], value[1], value[2], value[3]);
 }
 
 void
-SetFloatMat4Uniform(ShaderProgram *s, const char *name, float *v)
+SetFloatMat4Uniform(ShaderProgram *shader_program, const char *name, float *value)
 {
-    int id = glGetUniformLocation(s->id, name);
-    glUniformMatrix4fv(id, 1, GL_FALSE, v);
+    int uniform_id = glGetUniformLocation(shader_program->id, name);
+    glUniformMatrix4fv(uniform_id, 1, GL_FALSE, value);
 }
 
 void
-ReleaseShaderProgram(ShaderProgram *s)
+ReleaseShaderProgram(ShaderProgram *shader_program)
 {
-    if (s)
+    if (shader_program)
     {
-        if (s->vertex_file_buffer)
+        if (shader_program->vertex_file_buffer)
         {
-            free(s->vertex_file_buffer);
+            free(shader_program->vertex_file_buffer);
         }
-        if (s->fragment_file_buffer)
+        if (shader_program->fragment_file_buffer)
         {
-            free(s->fragment_file_buffer);
+            free(shader_program->fragment_file_buffer);
         }
-        glDeleteProgram(s->id);
-        free(s);
+        glDeleteProgram(shader_program->id);
+        free(shader_program);
     }
 }
 #endif

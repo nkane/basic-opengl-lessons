@@ -1,7 +1,6 @@
-#include "glm/fwd.hpp"
 #define GLEW_STATIC
 #include <GL\glew.h>
-#include <GLFW/glfw3.h>
+#include <GLFW\glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -14,11 +13,11 @@ enum Camera_Movement
     RIGHT,
 };
 
-const float YAW         = -90.0f;
-const float PITCH       =   0.0f;
-const float SPEED       =   5.0f;
-const float SENSITIVITY =   0.1f;
-const float ZOOM        =  45.0f;
+const float YAW             = -90.0f;
+const float PITCH           =   0.0f;
+const float SPEED           =   5.0f;
+const float SENSITIVITY     =   0.1f;
+const float ZOOM            =  45.0f;
 
 struct Camera
 {
@@ -48,14 +47,12 @@ LookAt(glm::vec3 position, glm::vec3 target, glm::vec3 world_up)
     rotation[0][0] = x_axis.x;
     rotation[1][0] = x_axis.y;
     rotation[2][0] = x_axis.z;
-
-    rotation[0][1] = x_axis.x;
-    rotation[1][1] = x_axis.y;
-    rotation[2][1] = x_axis.z;
-
-    rotation[0][2] = x_axis.x;
-    rotation[1][2] = x_axis.y;
-    rotation[2][2] = x_axis.z;
+    rotation[0][1] = y_axis.x;
+    rotation[1][1] = y_axis.y;
+    rotation[2][1] = y_axis.z;
+    rotation[0][2] = z_axis.x;
+    rotation[1][2] = z_axis.y;
+    rotation[2][2] = z_axis.z;
     return rotation * translation;
 }
 
@@ -68,27 +65,27 @@ UpdateCameraVectors(Camera *c)
     front.z = sin(glm::radians(c->yaw)) * cos(glm::radians(c->pitch));
     c->front = glm::normalize(front);
     c->right = glm::normalize(glm::cross(c->front, c->world_up));
-    c->up = glm::normalize(glm::cross(c->right, c->front));
+    c->up    = glm::normalize(glm::cross(c->right, c->front));
 }
 
 Camera *
 CreateCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 {
-    Camera *camera = (Camera *)malloc(sizeof(Camera));
-    if (!camera)
+    Camera *Result = (Camera *)malloc(sizeof(Camera));
+    if (!Result)
     {
         return NULL;
     }
-    memset(camera, 0, sizeof(Camera));
-    camera->position = position;
-    camera->world_up = up;
-    camera->yaw = yaw;
-    camera->pitch = pitch;
-    camera->movement_speed = SPEED;
-    camera->mouse_sensitivity = SENSITIVITY;
-    camera->zoom = ZOOM;
-    UpdateCameraVectors(camera);
-    return camera;
+    memset(Result, 0, sizeof(Camera));
+    Result->position = position;
+    Result->world_up = up;
+    Result->yaw = yaw;
+    Result->pitch = pitch;
+    Result->movement_speed = SPEED;
+    Result->mouse_sensitivity = SENSITIVITY;
+    Result->zoom = ZOOM;
+    UpdateCameraVectors(Result);
+    return Result;
 }
 
 glm::mat4
@@ -135,16 +132,18 @@ ProcessKeyboard(Camera *c, Camera_Movement direction, float delta_time)
             c->position += c->right * velocity;
         } break;
     }
+    // this keeps the camera on the x-z plane
+    //c->position.y = 0.0f;
 }
 
 void
-ProcessMouseMovement(Camera *c, float x_offset, float y_offset, GLboolean constraint_pitch)
+ProcessMouseMovement(Camera *c, float x_offset, float y_offset, GLboolean constraintPitch)
 {
     x_offset *= c->mouse_sensitivity;
     y_offset *= c->mouse_sensitivity;
     c->yaw += x_offset;
     c->pitch += y_offset;
-    if (constraint_pitch)
+    if (constraintPitch)
     {
         if (c->pitch > 89.0f)
         {
@@ -166,7 +165,7 @@ ProcessMouseScroll(Camera *c, float y_offset)
     {
         c->zoom = 1.0f;
     }
-    if (c->zoom > 45.0)
+    if (c->zoom > 45.0f)
     {
         c->zoom = 45.0f;
     }

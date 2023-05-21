@@ -135,8 +135,12 @@ main()
 
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, screen_width, screen_height);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+
+    glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_ALWAYS);
+    glDepthFunc(GL_LESS);
 
     ShaderProgram *shader = CreateShaderProgram("./shaders/vertex.glsl", "./shaders/fragment.glsl");
     if (!shader)
@@ -208,7 +212,7 @@ main()
     unsigned int cube_vertex_buffer_object; 
     glGenVertexArrays(1, &cube_vertex_array_object);
     glGenBuffers(1, &cube_vertex_buffer_object);
-    glBindVertexArray(cube_vertex_buffer_object);
+    glBindVertexArray(cube_vertex_array_object);
     glBindBuffer(GL_ARRAY_BUFFER, cube_vertex_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), &cube_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -244,10 +248,25 @@ main()
         printf("[STB_Image ERROR]: failed to load image (%s)\n", marble_path);
         return -1;
     }
+    GLenum format;
+    switch (marble_texture.channels)
+    {
+        case 1:
+        {
+            format = GL_RED;
+        } break;
+        case 3:
+        {
+            format = GL_RGB;
+        } break;
+        case 4:
+        {
+            format = GL_RGBA;
+        } break;
+    }
     glGenTextures(1, &marble_texture.id);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, marble_texture.id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, marble_texture.width, marble_texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, marble_texture.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, marble_texture.width, marble_texture.height, 0, format, GL_UNSIGNED_BYTE, marble_texture.data);
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -258,7 +277,7 @@ main()
 
     Texture metal_texture = {};
     const char *metal_path = "assets/metal.png";
-    metal_texture.data = stbi_load(marble_path, 
+    metal_texture.data = stbi_load(metal_path, 
                           &metal_texture.width,
                           &metal_texture.height,
                           &metal_texture.channels, 0);
@@ -267,10 +286,24 @@ main()
         printf("[STB_Image ERROR]: failed to load image (%s)\n", metal_path);
         return -1;
     }
+    switch (metal_texture.channels)
+    {
+        case 1:
+        {
+            format = GL_RED;
+        } break;
+        case 3:
+        {
+            format = GL_RGB;
+        } break;
+        case 4:
+        {
+            format = GL_RGBA;
+        } break;
+    }
     glGenTextures(1, &metal_texture.id);
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, metal_texture.id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, metal_texture.width, metal_texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, metal_texture.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, metal_texture.width, metal_texture.height, 0, format, GL_UNSIGNED_BYTE, metal_texture.data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -281,9 +314,6 @@ main()
     // camera
     camera = CreateCamera(camera_position, camera_up, yaw, pitch);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
-
     glUseProgram(shader->id);
     SetIntUniform(shader, "texutre_1", 0);
 
@@ -292,21 +322,39 @@ main()
         float current_frame = (float)(glfwGetTime());
         delta_time = current_frame - last_frame;
         last_frame = current_frame;
+
         // input
         ProcessInput(window);   
+
         // render
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(shader->id);
+
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = GetViewMatrix(camera);
         glm::mat4 projection = glm::perspective(glm::radians(camera->zoom), (float)screen_width / (float)screen_height, 0.1f, 100.0f);
         SetFloatMat4Uniform(shader, "view", glm::value_ptr(view));
         SetFloatMat4Uniform(shader, "projection", glm::value_ptr(projection));
+
+        // cubes
         glBindVertexArray(cube_vertex_array_object);
-        glBindTexture(GL_TEXTURE_2D, marble_texture.id);
         glActiveTexture(GL_TEXTURE0);
-        
+        glBindTexture(GL_TEXTURE_2D, marble_texture.id);
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        SetFloatMat4Uniform(shader,"model", glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        SetFloatMat4Uniform(shader,"model", glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // floor
+        glBindVertexArray(plane_vertex_array_object);
+        glBindTexture(GL_TEXTURE_2D, metal_texture.id);
+        glm::mat4 floor_model = glm::mat4(1.0f);
+        SetFloatMat4Uniform(shader,"model", glm::value_ptr(floor_model));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
