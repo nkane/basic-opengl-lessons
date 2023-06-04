@@ -144,9 +144,9 @@ main()
     // in front of the fragments that were drawn before, even though they should have
     // been at the front, since we've drawn the floor plane last, the plane's fragments
     // overwrite each of the container's previously written fragments
-    glDepthFunc(GL_ALWAYS);
+    //glDepthFunc(GL_ALWAYS);
     // NOTE(nick): setting it back to GL_LESS gives us the type of scene we are used to
-    //glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LESS);
 
     ShaderProgram *shader = CreateShaderProgram("./shaders/vertex.glsl", "./shaders/fragment.glsl");
     if (!shader)
